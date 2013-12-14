@@ -46,24 +46,29 @@
 #include <cstdio>
 #include <unistd.h>
 #include <iostream>
+#include <numeric>
+#include <vector>
 
 #include <Teuchos_XMLParameterListHelpers.hpp>
-#include <Teuchos_StandardCatchMacros.hpp>
 
+#include <Xpetra_Import.hpp>
+#include <Xpetra_MapFactory.hpp>
+#include <Xpetra_MatrixFactory.hpp>
 #include <Xpetra_MultiVectorFactory.hpp>
 #include <Xpetra_ImportFactory.hpp>
 
-// Galeri
 #include <Galeri_XpetraParameters.hpp>
 #include <Galeri_XpetraProblemFactory.hpp>
 #include <Galeri_XpetraUtils.hpp>
 #include <Galeri_XpetraMaps.hpp>
-//
 
 #include <MueLu.hpp>
 #include <MueLu_Level.hpp>
 #include <MueLu_BaseClass.hpp>
 #include <MueLu_ParameterListInterpreter.hpp> // TODO: move into MueLu.hpp
+
+#include <MueLu_RepartitionFactory.hpp>
+#include <MueLu_Zoltan2Interface.hpp>
 
 #include <MueLu_Utilities.hpp>
 
@@ -80,19 +85,23 @@
 #include <BelosMueLuAdapter.hpp>      // => This header defines Belos::MueLuOp
 #endif
 
+using namespace Teuchos;
+
+namespace MueLuTests {
+
+#include <MueLu_UseShortNames.hpp>
+  RCP<const Import> RemapTasks2Procs(RCP<Matrix> A, RCP<MultiVector> coordinates, std::ostream& fancyout);
+
+}
+
 int main(int argc, char *argv[]) {
 #include <MueLu_UseShortNames.hpp>
-
-  using Teuchos::RCP;
-  using Teuchos::rcp;
-  using Teuchos::ArrayRCP;
-  using Teuchos::TimeMonitor;
-  using Teuchos::ParameterList;
+  using namespace MueLuTests;
 
   // =========================================================================
   // MPI initialization using Teuchos
   // =========================================================================
-  Teuchos::GlobalMPISession mpiSession(&argc, &argv, NULL);
+  GlobalMPISession mpiSession(&argc, &argv, NULL);
 
   bool success = false;
   bool verbose = true;
@@ -127,6 +136,8 @@ int main(int argc, char *argv[]) {
     int         numRebuilds       = 0;                 clp.setOption("rebuild",               &numRebuilds,       "#times to rebuild hierarchy");
     int         maxIts            = 200;               clp.setOption("its",                   &maxIts,            "maximum number of solver iterations");
     bool        scaleResidualHist = true;              clp.setOption("scale", "noscale",      &scaleResidualHist, "scaled Krylov residual history");
+
+    bool        taskMapping       = false;             clp.setOption("maptasks", "nomaptasks",&taskMapping,     "use Zoltan2 task mapping");
 
     switch (clp.parse(argc, argv)) {
       case Teuchos::CommandLineProcessor::PARSE_HELP_PRINTED:        return EXIT_SUCCESS;
@@ -269,6 +280,31 @@ int main(int argc, char *argv[]) {
 
     galeriStream << "Galeri complete.\n========================================================" << std::endl;
 
+    // =========================================================================
+    // Task to processor remapper
+    // =========================================================================
+    if (paramList.isParameter("map tasks"))
+        taskMapping = paramList.get<bool>("map tasks");
+    if (taskMapping) {
+        RCP<const Import> importer = RemapTasks2Procs(A, coordinates, galeriStream);
+
+        if (!importer.is_null()) {
+            RCP<const Map> targetMap = importer->getTargetMap();
+            RCP<Matrix>    tmpA      = MatrixFactory::Build(A, *importer, targetMap, targetMap);
+            A.swap(tmpA);
+
+            RCP<MultiVector> tmpVector = MultiVectorFactory::Build(targetMap, coordinates->getNumVectors());
+            tmpVector->doImport(*coordinates, *importer, Xpetra::INSERT);
+            coordinates.swap(tmpVector);
+
+            tmpVector = MultiVectorFactory::Build(targetMap, nullspace->getNumVectors());
+            tmpVector->doImport(*nullspace, *importer, Xpetra::INSERT);
+            nullspace.swap(tmpVector);
+        }
+
+        map = A->getRowMap();
+    }
+
     int numReruns = 1;
     if (paramList.isParameter("number of reruns"))
       numReruns = paramList.get<int>("number of reruns");
@@ -361,6 +397,9 @@ int main(int argc, char *argv[]) {
 
         RCP<Hierarchy> H;
         for (int i = 0; i <= numRebuilds; i++) {
+          // We cache in the max eigenvalue estimate with a matrix
+          // To make hierarchy builds completely independent, we need
+          // to reset it
           A->SetMaxEigenvalueEstimate(-one);
 
           H = mueLuFactory->CreateHierarchy();
@@ -372,7 +411,7 @@ int main(int argc, char *argv[]) {
         }
 
         comm->barrier();
-        tm = Teuchos::null;
+        tm = null;
 
         // =========================================================================
         // System solution (Ax = b)
@@ -387,19 +426,19 @@ int main(int argc, char *argv[]) {
           // we set seed for reproducibility
           Utils::SetRandomSeed(*comm);
           X->randomize();
-          A->apply(*X, *B, Teuchos::NO_TRANS, one, zero);
+          A->apply(*X, *B, NO_TRANS, one, zero);
 
-          Teuchos::Array<STS::magnitudeType> norms(1);
+          Array<STS::magnitudeType> norms(1);
           B->norm2(norms);
           B->scale(one/norms[0]);
           X->putScalar(zero);
         }
-        tm = Teuchos::null;
+        tm = null;
 
         if (writeMatricesOPT > -2) {
           tm = rcp(new TimeMonitor(*TimeMonitor::getNewTimer("ScalingTest: 3.5 - Matrix output")));
           H->Write(writeMatricesOPT, writeMatricesOPT);
-          tm = Teuchos::null;
+          tm = null;
         }
 
         comm->barrier();
@@ -423,8 +462,8 @@ int main(int argc, char *argv[]) {
           H->IsPreconditioner(true);
 
           // Define Operator and Preconditioner
-          Teuchos::RCP<OP> belosOp   = Teuchos::rcp(new Belos::XpetraOp<SC, LO, GO, NO>(A)); // Turns a Xpetra::Matrix object into a Belos operator
-          Teuchos::RCP<OP> belosPrec = Teuchos::rcp(new Belos::MueLuOp <SC, LO, GO, NO>(H)); // Turns a MueLu::Hierarchy object into a Belos operator
+          RCP<OP> belosOp   = rcp(new Belos::XpetraOp<SC, LO, GO, NO>(A)); // Turns a Xpetra::Matrix object into a Belos operator
+          RCP<OP> belosPrec = rcp(new Belos::MueLuOp <SC, LO, GO, NO>(H)); // Turns a MueLu::Hierarchy object into a Belos operator
 
           // Construct a Belos LinearProblem object
           RCP< Belos::LinearProblem<SC, MV, OP> > belosProblem = rcp(new Belos::LinearProblem<SC, MV, OP>(belosOp, X, B));
@@ -471,8 +510,8 @@ int main(int argc, char *argv[]) {
           throw MueLu::Exceptions::RuntimeError("Unknown solver type: \"" + solveType + "\"");
         }
         comm->barrier();
-        tm = Teuchos::null;
-        globalTimeMonitor = Teuchos::null;
+        tm = null;
+        globalTimeMonitor = null;
 
         if (printTimings)
           TimeMonitor::summarize(A->getRowMap()->getComm().ptr(), std::cout, false, true, false, Teuchos::Union, "", true);
@@ -497,4 +536,69 @@ int main(int argc, char *argv[]) {
   TEUCHOS_STANDARD_CATCH_STATEMENTS(verbose, std::cerr, success);
 
   return ( success ? EXIT_SUCCESS : EXIT_FAILURE );
-} //main
+}
+
+namespace MueLuTests {
+
+#include <MueLu_UseShortNames.hpp>
+  RCP<const Import> RemapTasks2Procs(RCP<Matrix> A, RCP<MultiVector> coordinates, std::ostream& fancyout) {
+    if (A->GetFixedBlockSize() > 1) {
+      fancyout << "\nWARNING: ignoring remapping on fine level, as block size > 1. This could be fixed, but that would require "
+          "us to construct a second Import object for coordinates, as we cannot use the one for the matrix" << std::endl;
+      return null;
+    }
+
+    RCP<const Map> map = A->getRowMap();
+
+    RCP<const Teuchos::Comm<int> > comm = map->getComm();
+    int numProcs = comm->getSize();
+    int myRank   = comm->getRank();
+
+    RCP<GOVector> decomposition = GOVectorFactory::Build(map, false);
+
+    LO nLocal = decomposition->getLocalLength();
+    if (nLocal) {
+      ArrayRCP<GO> decompEntries = decomposition->getDataNonConst(0);
+      for (LO i = 0; i < nLocal; i++)
+        decompEntries[i] = myRank;
+    }
+
+    // We use our custom partitioning that is given via Level to Repartition. It must be
+    // associated with an instance of the Zoltan2Interface so that it can be found inside Repartition.
+    // Furthermore, that same instance must be supplied to MueLu::Repartition.
+    Level level;
+    level.SetLevelID(1);
+
+    RCP<FactoryManagerBase> factoryHandler = rcp(new FactoryManager());
+    level.SetFactoryManager(factoryHandler);
+
+    RCP<Zoltan2Interface> zoltan = rcp(new Zoltan2Interface());
+
+    level.Set<RCP<Matrix> >     ("A",                    A);
+    level.Set<RCP<MultiVector> >("Coordinates",          coordinates);
+    level.Set<GO>               ("number of partitions", numProcs);
+
+    level.Request("Partition", zoltan.get());
+    level.Set<RCP<GOVector> >("Partition", decomposition, zoltan.get());
+
+    RCP<const FactoryBase> userFactory = rcp_static_cast<const FactoryBase>(MueLu::NoFactory::getRCP());
+
+    RCP<RepartitionFactory> repart = rcp(new RepartitionFactory());
+    ParameterList paramList;
+    paramList.set("startLevel",                   1);
+    paramList.set("minRowsPerProcessor",          1);
+    paramList.set("nonzeroImbalance",             0.9);                     // setting it to 0.9 makes it always pass the imbalance test
+    paramList.set("repartition: remap algorithm", "zoltan2_task_map");
+    repart->SetParameterList(paramList);
+    repart->SetFactory("Partition", zoltan);
+
+    // Build
+    level.Request("Importer", repart.get());
+    repart->Build(level);
+
+    RCP<const Import> importer;
+    level.Get("Importer", importer, repart.get());
+
+    return importer;
+  }
+}

@@ -84,6 +84,16 @@ TRIBITS_ADD_OPTION_AND_DEFINE(${PACKAGE_NAME}_ENABLE_Boost_for_real
   "Enable Boost"
   OFF)
 
+# RCA
+TRIBITS_ADD_OPTION_AND_DEFINE(${PACKAGE_NAME}_ENABLE_rca
+  HAVE_${PACKAGE_NAME_UC}_RCA
+  "Enable RCA"
+  OFF
+)
+IF (${PACKAGE_NAME}_ENABLE_rca)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lrca")
+ENDIF ()
+
 # Explicit instantiation options:
 # - MueLu_ENABLE_EXPLICIT_INSTANTIATION
 # - MueLu_INST_DOUBLE_INT_INT         (= ON by default)

@@ -17,6 +17,10 @@
 
 #cmakedefine HAVE_MUELU_BOOST_FOR_REAL
 
+#cmakedefine HAVE_MUELU_RCA
+
+#cmakedefine HAVE_MUELU_GEMINI_COUNTERS
+
 /* Optional Dependencies */
 
 #cmakedefine HAVE_MUELU_AMESOS

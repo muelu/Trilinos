@@ -297,7 +297,7 @@ namespace MueLuTests {
 
     RCP<RepartitionFactory> repart = rcp(new RepartitionFactory());
 
-    repart->DeterminePartitionPlacement(*A, *decomposition, numPartitions);
+    repart->DeterminePartitionPlacement(-1, *A, *decomposition, numPartitions);
 
     Teuchos::ArrayRCP<GO> decompEntries = decomposition->getDataNonConst(0);
     switch (myRank) {
@@ -412,7 +412,7 @@ namespace MueLuTests {
 
     RCP<RepartitionFactory> repart = rcp(new RepartitionFactory());
 
-    repart->DeterminePartitionPlacement(*A, *decomposition, numPartitions);
+    repart->DeterminePartitionPlacement(-1, *A, *decomposition, numPartitions);
 
     Teuchos::ArrayRCP<GO> decompEntries = decomposition->getDataNonConst(0);
     switch (myRank)  {
@@ -521,7 +521,7 @@ namespace MueLuTests {
 
     RCP<RepartitionFactory> repart = rcp(new RepartitionFactory());
 
-    repart->DeterminePartitionPlacement(*A, *decomposition, numPartitions);
+    repart->DeterminePartitionPlacement(-1, *A, *decomposition, numPartitions);
 
     Teuchos::ArrayRCP<GO> decompEntries = decomposition->getDataNonConst(0);
     switch (myRank)  {
@@ -623,7 +623,7 @@ namespace MueLuTests {
 
     RCP<RepartitionFactory> repart = rcp(new RepartitionFactory());
 
-    repart->DeterminePartitionPlacement(*A, *decomposition, numPartitions);
+    repart->DeterminePartitionPlacement(-1, *A, *decomposition, numPartitions);
 
     Teuchos::ArrayRCP<GO> decompEntries = decomposition->getDataNonConst(0);
     switch (myRank)  {

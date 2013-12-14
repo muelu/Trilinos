@@ -105,7 +105,7 @@ namespace MueLu {
   "<Parameter name=\"repartition: start level\" type=\"int\" value=\"2\"/>"
   "<Parameter name=\"repartition: min rows per proc\" type=\"int\" value=\"800\"/>"
   "<Parameter name=\"repartition: max imbalance\" type=\"double\" value=\"1.2\"/>"
-  "<Parameter name=\"repartition: remap parts\" type=\"bool\" value=\"true\"/>"
+  "<Parameter name=\"repartition: remap algorithm\" type=\"string\" value=\"muelu\"/>"
   "<Parameter name=\"repartition: remap num values\" type=\"int\" value=\"4\"/>"
   "<Parameter name=\"repartition: print partition distribution\" type=\"bool\" value=\"false\"/>"
   "<Parameter name=\"repartition: rebalance P and R\" type=\"bool\" value=\"true\"/>"

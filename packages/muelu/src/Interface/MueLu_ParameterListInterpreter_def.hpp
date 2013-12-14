@@ -649,11 +649,12 @@ namespace MueLu {
       MUELU_TEST_AND_SET_PARAM(repartParams, "repartition: max imbalance",     paramList, defaultList, double);
       MUELU_TEST_AND_SET_PARAM(repartParams, "repartition: keep proc 0",       paramList, defaultList, bool);
       MUELU_TEST_AND_SET_PARAM(repartParams, "repartition: print partition distribution", paramList, defaultList, bool);
-      MUELU_TEST_AND_SET_PARAM(repartParams, "repartition: remap parts",       paramList, defaultList, bool);
+      MUELU_TEST_AND_SET_PARAM(repartParams, "repartition: remap algorithm",   paramList, defaultList, std::string);
       MUELU_TEST_AND_SET_PARAM(repartParams, "repartition: remap num values",  paramList, defaultList, int);
       repartFactory->SetParameterList(repartParams);
-      repartFactory->SetFactory("A",         manager.GetFactory("A"));
-      repartFactory->SetFactory("Partition", manager.GetFactory("Partition"));
+      repartFactory->SetFactory("A",           manager.GetFactory("A"));
+      repartFactory->SetFactory("Coordinates", manager.GetFactory("Coordinates"));
+      repartFactory->SetFactory("Partition",   manager.GetFactory("Partition"));
       manager.SetFactory("Importer", repartFactory);
 
       // Rebalanced A

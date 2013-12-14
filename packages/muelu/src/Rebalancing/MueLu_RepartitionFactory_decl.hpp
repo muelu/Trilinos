@@ -60,6 +60,7 @@
 #include <Xpetra_Vector_fwd.hpp>
 #include <Xpetra_Matrix_fwd.hpp>
 #include <Xpetra_MatrixFactory_fwd.hpp>
+#include <Xpetra_MultiVector_fwd.hpp>
 
 #include "MueLu_SingleLevelFactoryBase.hpp"
 #include "MueLu_RepartitionFactory_fwd.hpp"
@@ -123,7 +124,13 @@ namespace MueLu {
       Partitions are assigned to processes in order to minimize data movement.  The basic idea is that a good choice for partition
       owner is to choose the pid that already has the greatest number of nonzeros for a particular partition.
     */
-    void DeterminePartitionPlacement(const Matrix& A, GOVector& decomposition, GO numPartitions) const;
+    void DeterminePartitionPlacement (int levelID, const Matrix& A, GOVector& decomposition, GO numPartitions) const;
+    void DeterminePartitionPlacement1(int levelID, const Matrix& A, const MultiVector& coordinates, GOVector& decomposition, GO numPartitions) const;
+
+    //@}
+
+  private:
+    void getNeighborData(const Matrix& A, std::vector<int>& neighs, std::vector<SC>& weights) const;
 
   }; // class RepartitionFactory
 

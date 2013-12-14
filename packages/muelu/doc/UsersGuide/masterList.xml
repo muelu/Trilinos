@@ -327,10 +327,10 @@
   </parameter>
 
   <parameter>
-    <name>repartition: remap parts</name>
-    <type>bool</type>
-    <default>true</default>
-    <description>Postprocessing for partitioning to reduce data migration.</description>
+    <name>repartition: remap algorithm</name>
+    <type>string</type>
+    <default>"muelu"</default>
+    <description>Postprocessing algorithm for partitioning to reduce data migration.</description>
   </parameter>
 
   <parameter>
