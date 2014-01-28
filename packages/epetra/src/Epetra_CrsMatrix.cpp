@@ -3105,6 +3105,7 @@ int Epetra_CrsMatrix::Multiply(bool TransA, const Epetra_Vector& x, Epetra_Vecto
 
 //=============================================================================
 int Epetra_CrsMatrix::Multiply(bool TransA, const Epetra_MultiVector& X, Epetra_MultiVector& Y) const {
+  Teuchos::TimeMonitor localApplyTime(*Teuchos::TimeMonitor::getNewTimer("Petra::MxV"));
 
 #ifdef EPETRA_CRSMATRIX_TEUCHOS_TIMERS
   TEUCHOS_FUNC_TIME_MONITOR("Epetra_CrsMatrix::Multiply(TransA,X,Y)");
@@ -3161,7 +3162,10 @@ int Epetra_CrsMatrix::Multiply(bool TransA, const Epetra_MultiVector& X, Epetra_
 
     // If we have a non-trivial importer, we must import elements that are permuted or are on other processors
     if (Importer()!=0) {
-      EPETRA_CHK_ERR(ImportVector_->Import(X, *Importer(), Insert));
+      {
+        Teuchos::TimeMonitor localApplyTime(*Teuchos::TimeMonitor::getNewTimer("Petra::MxV import"));
+        EPETRA_CHK_ERR(ImportVector_->Import(X, *Importer(), Insert));
+      }
       Xp = (double**)ImportVector_->Pointers();
       LDX = ImportVector_->ConstantStride() ? ImportVector_->Stride() : 0;
 #ifdef EPETRA_CRS_MATRIX_TRACE_DUMP_MULTIPLY
@@ -3181,10 +3185,13 @@ int Epetra_CrsMatrix::Multiply(bool TransA, const Epetra_MultiVector& X, Epetra_
     }
 
     // Do actual computation
-    if (NumVectors==1)
-      GeneralMV(*Xp, *Yp);
-    else
-      GeneralMM(Xp, LDX, Yp, LDY, NumVectors);
+    {
+      Teuchos::TimeMonitor localApplyTime(*Teuchos::TimeMonitor::getNewTimer("Petra::MxV local multiply"));
+      if (NumVectors==1)
+        GeneralMV(*Xp, *Yp);
+      else
+        GeneralMM(Xp, LDX, Yp, LDY, NumVectors);
+    }
 #ifdef EPETRA_CRS_MATRIX_TRACE_DUMP_MULTIPLY
     if(Epetra_CrsMatrixTraceDumpMultiply) {
       *out << "\nRowMap =\n";
@@ -3198,7 +3205,10 @@ int Epetra_CrsMatrix::Multiply(bool TransA, const Epetra_MultiVector& X, Epetra_
 #endif // EPETRA_CRS_MATRIX_TRACE_DUMP_MULTIPLY
     if (Exporter()!=0) {
       Y.PutScalar(0.0);  // Make sure target is zero
-      Y.Export(*ExportVector_, *Exporter(), Add); // Fill Y with Values from export vector
+      {
+        Teuchos::TimeMonitor localApplyTime(*Teuchos::TimeMonitor::getNewTimer("Petra::MxV export"));
+        Y.Export(*ExportVector_, *Exporter(), Add); // Fill Y with Values from export vector
+      }
 #ifdef EPETRA_CRS_MATRIX_TRACE_DUMP_MULTIPLY
       if(Epetra_CrsMatrixTraceDumpMultiply) {
         *out << "\nRangeMap =\n";

@@ -3224,6 +3224,8 @@ namespace Tpetra {
     using Teuchos::rcp_const_cast;
     using Teuchos::rcpFromRef;
 
+    Teuchos::TimeMonitor applyTime(*Teuchos::TimeMonitor::getNewTimer("Petra::MxV"));
+
     // mfh 05 Jun 2014: Special case for alpha == 0.  I added this to
     // fix an Ifpack2 test (RILUKSingleProcessUnitTests), which was
     // failing only for the Kokkos refactor version of Tpetra.  It's a
@@ -3297,7 +3299,10 @@ namespace Tpetra {
       RCP<MV> X_colMapNonConst = getColumnMapMultiVector (X_in);
 
       // Import from the domain Map MV to the column Map MV.
-      X_colMapNonConst->doImport (X_in, *importer, INSERT);
+      {
+        Teuchos::TimeMonitor localApplyTime(*Teuchos::TimeMonitor::getNewTimer("Petra::MxV import"));
+        X_colMapNonConst->doImport (X_in, *importer, INSERT);
+      }
       X_colMap = rcp_const_cast<const MV> (X_colMapNonConst);
     }
 
@@ -3311,9 +3316,12 @@ namespace Tpetra {
     // constant-stride version of Y_in in this case, because we had to
     // make a constant stride Y_rowMap MV and do an Export anyway.
     if (! exporter.is_null ()) {
-      this->template localMultiply<Scalar, Scalar> (*X_colMap, *Y_rowMap,
-                                                    Teuchos::NO_TRANS,
-                                                    alpha, STS::zero ());
+      {
+        Teuchos::TimeMonitor localApplyTime(*Teuchos::TimeMonitor::getNewTimer("Petra::MxV local multiply"));
+        this->template localMultiply<Scalar, Scalar> (*X_colMap, *Y_rowMap,
+                                                      Teuchos::NO_TRANS,
+                                                      alpha, STS::zero ());
+      }
       // If we're overwriting the output MV Y_in completely (beta ==
       // 0), then make sure that it is filled with zeros before we do
       // the Export.  Otherwise, the ADD combine mode will use data in
@@ -3327,7 +3335,10 @@ namespace Tpetra {
         Y_in.scale (beta);
       }
       // Do the Export operation.
-      Y_in.doExport (*Y_rowMap, *exporter, ADD);
+      {
+        Teuchos::TimeMonitor localApplyTime(*Teuchos::TimeMonitor::getNewTimer("Petra::MxV export"));
+        Y_in.doExport (*Y_rowMap, *exporter, ADD);
+      }
     }
     else { // Don't do an Export: row Map and range Map are the same.
       //
@@ -3350,13 +3361,17 @@ namespace Tpetra {
         if (beta != STS::zero ()) {
           Tpetra::deep_copy (*Y_rowMap, Y_in);
         }
-        this->template localMultiply<Scalar, Scalar> (*X_colMap,
-                                                      *Y_rowMap,
-                                                      Teuchos::NO_TRANS,
-                                                      alpha, beta);
+        {
+          Teuchos::TimeMonitor localApplyTime(*Teuchos::TimeMonitor::getNewTimer("Petra::MxV local multiply"));
+          this->template localMultiply<Scalar, Scalar> (*X_colMap,
+                                                        *Y_rowMap,
+                                                        Teuchos::NO_TRANS,
+                                                        alpha, beta);
+        }
         Tpetra::deep_copy (Y_in, *Y_rowMap);
       }
       else {
+        Teuchos::TimeMonitor localApplyTime(*Teuchos::TimeMonitor::getNewTimer("Petra::MxV local multiply"));
         this->template localMultiply<Scalar, Scalar> (*X_colMap, Y_in,
                                                       Teuchos::NO_TRANS,
                                                       alpha, beta);
