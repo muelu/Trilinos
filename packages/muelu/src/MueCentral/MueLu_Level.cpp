@@ -128,7 +128,7 @@ namespace MueLu {
 
   KeepType Level::GetKeepFlag(const std::string& ename, const FactoryBase* factory) const {
     if (!IsKey(factory,ename))
-      return false;
+      return KeepNone;
 
     return Get(factory, ename)->GetKeepFlag();
   }
@@ -246,7 +246,7 @@ namespace MueLu {
       v->Release(requestedBy);
 
       // Remove data if no keep flag left and counter == 0
-      if ((v->IsRequested() == false) && (v->GetKeepFlag() == 0)) {
+      if ((v->IsRequested() == false) && (v->GetKeepFlag() == KeepNone)) {
         v = Teuchos::null; // free data
 
         map_[fac].erase(ename);
