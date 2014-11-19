@@ -206,12 +206,6 @@ namespace MueLu {
       return map_[fac][ename]->template GetData<T>();
     }
 
-    /*! @brief Get data without decrementing associated storage counter (i.e., read-only access).*/
-    template <class T>
-    void Get(const std::string& ename, T& rValue, const FactoryBase* factory = NoFactory::get()) {
-      rValue = Get<T>(ename, factory);
-    }
-
     //@}
 
     //! @name Permanent storage

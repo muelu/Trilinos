@@ -191,8 +191,7 @@ namespace MueLuTests {
     //               pid 1 owns partition 1
     //               pid 2 owns partition 2
     //               pid 3 does not own a partition
-    RCP<const Import> importer;
-    level.Get("Importer", importer, repart.get());
+    RCP<const Import> importer = level.Get<RCP<const Import> >("Importer", repart.get());
 
     RCP<Xpetra::Vector<GO,LO,GO,NO> > result = Xpetra::VectorFactory<GO,LO,GO,NO>::Build(importer->getTargetMap(), false);
     result->doImport(*decomposition, *importer, Xpetra::INSERT);
@@ -759,8 +758,7 @@ namespace MueLuTests {
     level.Request("Importer", repart.get());
     repart->Build(level);
 
-    RCP<const Import> importer;
-    level.Get("Importer", importer, repart.get());
+    RCP<const Import> importer = level.Get<RCP<const Import> >("Importer", repart.get());
 
     RCP<Matrix>        permutedA = MatrixFactory::Build(importer->getTargetMap(), A->getGlobalMaxNumRowEntries());
     permutedA->doImport(*A, *importer, Xpetra::INSERT);

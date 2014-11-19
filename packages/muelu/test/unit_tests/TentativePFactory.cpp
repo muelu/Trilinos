@@ -127,8 +127,7 @@ namespace MueLuTests {
     coarseLevel.Request(*TentativePFact);
     TentativePFact->Build(fineLevel,coarseLevel);
 
-    RCP<Matrix> Ptent;
-    coarseLevel.Get("P",Ptent,TentativePFact.get());
+    RCP<Matrix> Ptent = coarseLevel.Get<RCP<Matrix> >("P", TentativePFact.get());
 
     RCP<MultiVector> coarseNullSpace = coarseLevel.Get<RCP<MultiVector> >("Nullspace", TentativePFact.get());
 
@@ -200,8 +199,7 @@ namespace MueLuTests {
     coarseLevel.Request(*TentativePFact);
     TentativePFact->Build(fineLevel,coarseLevel);
 
-    RCP<Matrix> Ptent;
-    coarseLevel.Get("P",Ptent,TentativePFact.get());
+    RCP<Matrix> Ptent = coarseLevel.Get<RCP<Matrix> >("P", TentativePFact.get());
 
     RCP<MultiVector> coarseNullSpace = coarseLevel.Get<RCP<MultiVector> >("Nullspace",TentativePFact.get());
 
@@ -255,10 +253,9 @@ namespace MueLuTests {
     coarseLevel.Request(*tentativePFact);
     tentativePFact->Build(fineLevel,coarseLevel);
 
-    RCP<Matrix> Ptent;
-    coarseLevel.Get("P",Ptent,tentativePFact.get());
+    RCP<Matrix> Ptent = coarseLevel.Get<RCP<Matrix> >("P", tentativePFact.get());
 
-    RCP<MultiVector> coarseNullSpace = coarseLevel.Get<RCP<MultiVector> >("Nullspace",tentativePFact.get());
+    RCP<MultiVector> coarseNullSpace = coarseLevel.Get<RCP<MultiVector> >("Nullspace", tentativePFact.get());
 
     coarseLevel.Release("P",tentativePFact.get()); // release Ptent
     coarseLevel.Release("Nullspace",tentativePFact.get());   // release coarse nullspace
