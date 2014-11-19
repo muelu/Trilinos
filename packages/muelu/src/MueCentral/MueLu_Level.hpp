@@ -293,9 +293,6 @@ namespace MueLu {
     //! Callback from FactoryBase::CallDeclareInput() and FactoryBase::DeclareInput()
     void DeclareInput(const std::string& ename, const FactoryBase* factory, const FactoryBase* requestedBy = NoFactory::get() );
 
-    //! Callback from FactoryBase::CallDeclareInput() and FactoryBase::DeclareInput() to declare factory dependencies
-    void DeclareDependencies(const FactoryBase* factory, bool bRequestOnly = false, bool bReleaseOnly = false);
-
     //! Indicate that an object is needed. This increments the storage counter.
     void Request(const std::string& ename, const FactoryBase* factory = NoFactory::get(), const FactoryBase* requestedBy = NoFactory::get());
 
