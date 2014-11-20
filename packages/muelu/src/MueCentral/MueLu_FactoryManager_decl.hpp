@@ -133,9 +133,6 @@ namespace MueLu {
     */
     const RCP<const FactoryBase> GetFactory(const std::string& varName) const;
 
-    //!
-    const RCP<const FactoryBase> GetDefaultFactory(const std::string& varName) const;
-
     //@}
 
     void Clean() const { defaultFactoryTable_.clear(); }
