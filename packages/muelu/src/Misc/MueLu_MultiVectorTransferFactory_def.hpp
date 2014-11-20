@@ -72,10 +72,10 @@ namespace MueLu {
 
   template <class Scalar, class LocalOrdinal, class GlobalOrdinal, class Node>
   void MultiVectorTransferFactory<Scalar, LocalOrdinal, GlobalOrdinal, Node>::DeclareInput(Level &fineLevel, Level &coarseLevel) const {
-    const ParameterList & pL = GetParameterList();
-    std::string vectorName   = pL.get<std::string>("Vector name");
+    const ParameterList& pL = GetParameterList();
+    std::string vectorName = pL.get<std::string>("Vector name");
+    Input(fineLevel, vectorName, "Vector factory");
 
-    fineLevel.DeclareInput(vectorName, GetFactory("Vector factory").get(), this);
     Input(coarseLevel, "R");
   }
 

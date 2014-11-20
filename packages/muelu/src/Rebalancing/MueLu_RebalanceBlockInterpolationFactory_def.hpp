@@ -101,11 +101,10 @@ void RebalanceBlockInterpolationFactory<Scalar, LocalOrdinal, GlobalOrdinal, Nod
 
 template <class Scalar, class LocalOrdinal, class GlobalOrdinal, class Node>
 void RebalanceBlockInterpolationFactory<Scalar, LocalOrdinal, GlobalOrdinal, Node>::DeclareInput(Level &fineLevel, Level &coarseLevel) const {
-
   Input(coarseLevel, "P");
 
   std::vector<Teuchos::RCP<const FactoryManagerBase> >::const_iterator it;
-  for(it = FactManager_.begin(); it!=FactManager_.end(); ++it) {
+  for (it = FactManager_.begin(); it!=FactManager_.end(); ++it) {
     SetFactoryManager fineSFM  (rcpFromRef(fineLevel),   *it);
     SetFactoryManager coarseSFM(rcpFromRef(coarseLevel), *it);
     coarseLevel.DeclareInput("Importer",(*it)->GetFactory("Importer").get(), this);

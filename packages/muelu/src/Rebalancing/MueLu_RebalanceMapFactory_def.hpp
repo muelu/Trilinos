@@ -63,13 +63,13 @@ namespace MueLu {
     RCP<ParameterList> validParamList = rcp(new ParameterList());
 
     // Information about map that is to be rebalanced
-    validParamList->set< std::string >           ("Map name"   , "", "Name of map to rebalanced.");
-    validParamList->set< RCP<const FactoryBase> >("Map factory", MueLu::NoFactory::getRCP(), "Generating factory of map to be rebalanced.");
+    validParamList->set< std::string >           ("Map name"   ,                  "", "Name of map to rebalanced.");
+    validParamList->set< RCP<const FactoryBase> >("Map factory", NoFactory::getRCP(), "Generating factory of map to be rebalanced.");
 
     // Importer object with rebalancing information
-    validParamList->set< RCP<const FactoryBase> >("Importer",             Teuchos::null, "Factory of the importer object used for the rebalancing");
+    validParamList->set< RCP<const FactoryBase> >("Importer",          Teuchos::null, "Factory of the importer object used for the rebalancing");
 
-    validParamList->set< bool >                  ("useSubcomm",              true, "Construct subcommunicators");
+    validParamList->set< bool >                  ("useSubcomm",                 true, "Construct subcommunicators");
 
     return validParamList;
   }
@@ -77,13 +77,12 @@ namespace MueLu {
 
   template <class LocalOrdinal, class GlobalOrdinal, class Node>
   void RebalanceMapFactory<LocalOrdinal, GlobalOrdinal, Node>::DeclareInput(Level & currentLevel) const {
-    const Teuchos::ParameterList & pL = GetParameterList();
-    std::string mapName                        = pL.get<std::string> ("Map name");
-    Teuchos::RCP<const FactoryBase> mapFactory = GetFactory          ("Map factory");
-    currentLevel.DeclareInput(mapName,mapFactory.get(),this);
+    const ParameterList& pL = GetParameterList();
+    std::string mapName = pL.get<std::string>("Map name");
+    Input(currentLevel, mapName, "Map factory");
 
     Input(currentLevel, "Importer");
-  } //DeclareInput()
+  }
 
   template <class LocalOrdinal, class GlobalOrdinal, class Node>
   void RebalanceMapFactory<LocalOrdinal, GlobalOrdinal, Node>::Build(Level &level) const {

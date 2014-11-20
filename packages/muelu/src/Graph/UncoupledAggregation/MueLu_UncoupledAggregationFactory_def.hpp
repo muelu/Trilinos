@@ -133,10 +133,8 @@ namespace MueLu {
     const ParameterList& pL = GetParameterList();
 
     std::string mapOnePtName = pL.get<std::string>("OnePt aggregate map name");
-    if (mapOnePtName.length() > 0) {
-      RCP<const FactoryBase> mapOnePtFact = GetFactory("OnePt aggregate map factory");
-      currentLevel.DeclareInput(mapOnePtName, mapOnePtFact.get());
-    }
+    if (mapOnePtName.length() > 0)
+      Input(currentLevel, mapOnePtName, "OnePt aggregate map factory");
   }
 
   template <class LocalOrdinal, class GlobalOrdinal, class Node>

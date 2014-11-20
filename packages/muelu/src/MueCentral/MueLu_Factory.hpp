@@ -93,9 +93,9 @@ namespace MueLu {
 
     //! Default implementation of FactoryAcceptor::GetFactory()
     const RCP<const FactoryBase> GetFactory(const std::string& varName) const {
-      if (!GetParameterList().isParameter(varName)&& GetValidParameterList() == Teuchos::null) {
+      if (!GetParameterList().isParameter(varName) && GetValidParameterList() == Teuchos::null) {
         // If the parameter is not on the list and there is not validator, the defaults values for 'varName' is not set.
-        // Failback by using directly the FactoryManager
+        // Fallback by using directly the FactoryManager
         // NOTE: call to GetValidParameterList() can be costly for classes that validate parameters.
         // But it get called only (lazy '&&' operator) if the parameter 'varName' is not on the paramlist and
         // the parameter 'varName' is always on the list when validator is present and 'varName' is valid (at least the default value is set).
@@ -138,22 +138,13 @@ namespace MueLu {
 
   protected:
 
-    void Input(Level& level, const std::string& varName) const {
-      level.DeclareInput(varName, GetFactory(varName).get(), this);
-    }
-    // Similar to the other Input, but we have an alias (varParamName) to the generated data name (varName)
-    void Input(Level& level, const std::string& varName, const std::string& varParamName) const {
-      level.DeclareInput(varName, GetFactory(varParamName).get(), this);
+    void Input(Level& level, const std::string& varName, const std::string& factName = "") const {
+      level.DeclareInput(varName, GetFactory(factName == "" ? varName : factName).get(), this);
     }
 
     template <class T>
-    T Get(Level& level, const std::string& varName) const {
-      return level.Get<T>(varName, GetFactory(varName).get());
-    }
-    // Similar to the other Get, but we have an alias (varParamName) to the generated data name (varName)
-    template <class T>
-    T Get(Level& level, const std::string& varName, const std::string& varParamName) const {
-      return level.Get<T>(varName, GetFactory(varParamName).get());
+    T Get(Level& level, const std::string& varName, const std::string& factName = "") const {
+      return level.Get<T>(varName, GetFactory(factName == "" ? varName : factName).get());
     }
 
     template <class T>

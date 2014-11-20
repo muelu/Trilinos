@@ -76,26 +76,18 @@ namespace MueLu {
 
   template <class Scalar, class LocalOrdinal, class GlobalOrdinal, class Node>
   void NullspaceFactory<Scalar, LocalOrdinal, GlobalOrdinal, Node>::DeclareInput(Level &currentLevel) const {
-
-    const ParameterList & pL = GetParameterList();
+    const ParameterList& pL = GetParameterList();
     std::string nspName = pL.get<std::string>("Fine level nullspace");
 
-    // only request "A" in DeclareInput if
-    // 1) there is not nspName (e.g. "Nullspace") is available in Level, AND
-    // 2) it is the finest level (i.e. LevelID == 0)
-    if (currentLevel.IsAvailable(nspName, NoFactory::get()) == false && currentLevel.GetLevelID() == 0)
-      Input(currentLevel, "A");
-
-    if (currentLevel.GetLevelID() != 0) {
-
-      // validate nullspaceFact_
-
-      // 1) nullspaceFact_ must not be Teuchos::null, since the default factory for "Nullspace" is
-      //    a NullspaceFactory
-      // 2) nullspaceFact_ must be a TentativePFactory i.e. at least a TwoLevelFactoryBase derived object
-
-
-      currentLevel.DeclareInput("Nullspace", GetFactory(nspName).get(), this); /* ! "Nullspace" and nspName mismatch possible here */
+    if (currentLevel.GetLevelID() == 0) {
+      if (!IsAvailable(currentLevel, nspName)) {
+        // Request "A" iff
+        // - This is the the finest level (e.g., LevelID == 0)
+        // - No nspName (e.g., "Nullspace") is available in Level, AND
+        Input(currentLevel, "A");
+      }
+    } else {
+      Input(currentLevel, "Nullspace", nspName);
     }
   }
 
