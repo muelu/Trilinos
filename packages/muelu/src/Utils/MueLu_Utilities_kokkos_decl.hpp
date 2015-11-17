@@ -583,7 +583,6 @@ namespace MueLu {
 
       default:
         throw Exceptions::RuntimeError("Only Epetra and Tpetra matrices can be scaled.");
-        break;
       }
     }
 
@@ -729,7 +728,6 @@ namespace MueLu {
   #else
         throw Exceptions::RuntimeError("Utilities::Transpose: Tpetra is not compiled!");
   #endif
-        break;
       }
       case Xpetra::UseEpetra:
       {
@@ -751,14 +749,11 @@ namespace MueLu {
   #else
         throw Exceptions::RuntimeError("Epetra (Err. 2)");
   #endif
-        break;
       }
       default:
         throw Exceptions::RuntimeError("Only Epetra and Tpetra matrices can be transposed.");
-        break;
       }
 
-      return Teuchos::null;
     }
 
 

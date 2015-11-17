@@ -368,7 +368,6 @@ rowStatIsSupportedImpl(
       return false;
   }
 
-  return false; // Will never be called!
 }
 
 

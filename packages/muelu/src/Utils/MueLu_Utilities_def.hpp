@@ -373,7 +373,6 @@ namespace MueLu {
 
       default:
         throw Exceptions::RuntimeError("Only Epetra and Tpetra matrices can be scaled.");
-        break;
     }
   }
 

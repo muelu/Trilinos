@@ -1425,7 +1425,6 @@ int MatrixMatrix::Tjacobi_A_B(double omega,
 #endif
     throw std::runtime_error("jacobi_A_B_general not implemented");
     //    rv=mult_A_B_general<int_type>(A,Aview,B,Bview,C,false);
-    return rv;
   }
 
   // Is this a "clean" matrix
@@ -1444,7 +1443,6 @@ int MatrixMatrix::Tjacobi_A_B(double omega,
 #endif
     throw std::runtime_error("jacobi_A_B_general not implemented");
     //    rv=mult_A_B_general<int_type>(A,Aview,B,Bview,C,call_FillComplete_on_result);
-    return rv;
   }
 
 #ifdef ENABLE_MMM_TIMINGS

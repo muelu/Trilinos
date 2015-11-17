@@ -556,7 +556,6 @@ namespace MueLu {
 
         default:
           throw Exceptions::RuntimeError("Only Epetra and Tpetra matrices can be scaled.");
-          break;
       }
     }
 
@@ -702,7 +701,6 @@ In principle, however, we could allow any Epetra_RowMatrix because the Epetra tr
 #else
             throw Exceptions::RuntimeError("Utilities::Transpose: Tpetra is not compiled!");
 #endif
-            break;
           }
         case Xpetra::UseEpetra:
           {
@@ -724,14 +722,10 @@ In principle, however, we could allow any Epetra_RowMatrix because the Epetra tr
 #else
             throw Exceptions::RuntimeError("Epetra (Err. 2)");
 #endif
-            break;
           }
         default:
           throw Exceptions::RuntimeError("Only Epetra and Tpetra matrices can be transposed.");
-          break;
       }
-
-      return Teuchos::null;
     }
 
   }; // class Utilities (specialization SC=double LO=GO=int)
@@ -763,7 +757,6 @@ In principle, however, we could allow any Epetra_RowMatrix because the Epetra tr
   Convert_Epetra_CrsMatrix_ToXpetra_CrsMatrixWrap (RCP<Epetra_CrsMatrix> &epAB)
   {
     TEUCHOS_TEST_FOR_EXCEPTION(true, Exceptions::RuntimeError, "Convert_Epetra_CrsMatrix_ToXpetra_CrsMatrixWrap cannot be used with Scalar != double, LocalOrdinal != int, GlobalOrdinal != int");
-    return Teuchos::null;
   }
 
   typedef KokkosClassic::DefaultNode::DefaultNodeType KDNT;

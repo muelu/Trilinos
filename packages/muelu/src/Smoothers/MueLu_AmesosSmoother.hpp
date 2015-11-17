@@ -194,7 +194,6 @@ namespace MueLu {
                      const Teuchos::ParameterList& paramList = Teuchos::ParameterList ())
   {
     TEUCHOS_TEST_FOR_EXCEPTION(true, Exceptions::RuntimeError, "AmesosSmoother cannot be used with Scalar != double, LocalOrdinal != int, GlobalOrdinal != int");
-    return Teuchos::null;
   }
 
   // specialization for Epetra

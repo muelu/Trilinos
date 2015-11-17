@@ -75,7 +75,6 @@ bool EpetraExtAddTransformer::isCompatible(
       const LinearOpBase<double> &op_in) const
 {
    TEUCHOS_TEST_FOR_EXCEPT(true);
-   return false;
 }
 
 

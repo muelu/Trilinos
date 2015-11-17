@@ -103,7 +103,6 @@ RCP<Xpetra::CrsMatrixWrap<SC,LO,GO,NO> >
 Convert_Epetra_CrsMatrix_ToXpetra_CrsMatrixWrap (RCP<Epetra_CrsMatrix> &epAB)
 {
   TEUCHOS_TEST_FOR_EXCEPTION(true, Exceptions::RuntimeError, "Convert_Epetra_CrsMatrix_ToXpetra_CrsMatrixWrap cannot be used with Scalar != double, LocalOrdinal != int, GlobalOrdinal != int");
-  return Teuchos::null;
 }
 
 typedef KokkosClassic::DefaultNode::DefaultNodeType KDNT;
@@ -388,7 +387,6 @@ public:
       return A;
     }
 
-    return Teuchos::null;
 
   } //Read()
 
@@ -506,7 +504,6 @@ public:
       return A;
     }
 
-    return Teuchos::null;
   }
   //@}
 
@@ -535,7 +532,6 @@ public:
       throw Exceptions::RuntimeError("Utils::Read : you must specify Xpetra::UseEpetra or Xpetra::UseTpetra.");
     }
 
-    return Teuchos::null;
 
   }
 
@@ -562,7 +558,6 @@ public:
       throw Exceptions::RuntimeError("Utils::Read : you must specify Xpetra::UseEpetra or Xpetra::UseTpetra.");
     }
 
-    return Teuchos::null;
 
   }
 
@@ -819,7 +814,6 @@ public:
       return A;
     }
 
-    return Teuchos::null;
 
   } //Read()
 
@@ -941,7 +935,6 @@ public:
       return A;
     }
 
-    return Teuchos::null;
   }
   //@}
 
@@ -981,7 +974,6 @@ public:
       throw Exceptions::RuntimeError("Utils::Read : you must specify Xpetra::UseEpetra or Xpetra::UseTpetra.");
     }
 
-    return Teuchos::null;
 
   }
 
@@ -1023,8 +1015,6 @@ public:
     } else {
       throw Exceptions::RuntimeError("Utils::Read : you must specify Xpetra::UseEpetra or Xpetra::UseTpetra.");
     }
-
-    return Teuchos::null;
 
   }
 

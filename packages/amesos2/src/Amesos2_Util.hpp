@@ -611,10 +611,8 @@ namespace Amesos2 {
       case DISTRIBUTED:
       case DISTRIBUTED_NO_OVERLAP:
 	return Tpetra::createUniformContigMapWithNode<LO,GO, Node>(num_global_elements, comm);
-	break;
       case GLOBALLY_REPLICATED:
 	return Tpetra::createLocalMapWithNode<LO,GO, Node>(num_global_elements, comm);
-	break;
       case ROOTED:
 	{
 	  int rank = Teuchos::rank(*comm);
@@ -622,14 +620,12 @@ namespace Amesos2 {
 	  if( rank == 0 ) my_num_elems = num_global_elements;
 	  return rcp(new Tpetra::Map<LO,GO, Node>(num_global_elements,
 						my_num_elems, indexBase, comm));
-	  break;
 	}
       default:
 	TEUCHOS_TEST_FOR_EXCEPTION( true,
 			    std::logic_error,
 			    "Control should never reach this point.  "
 			    "Please contact the Amesos2 developers." );
-	break;
       }
     }
 

@@ -203,7 +203,6 @@ namespace Amesos2 {
 			std::runtime_error,
 			"Column access to row-based object not yet supported.  "
 			"Please contact the Amesos2 developers." );
-    return 0;
   }
 
   template <typename Scalar,
@@ -255,7 +254,6 @@ namespace Amesos2 {
 			std::runtime_error,
 			"Column access to row-based object not yet supported.  "
 			"Please contact the Amesos2 developers." );
-    return 0;
   }
 
   template <typename Scalar,
@@ -275,7 +273,6 @@ namespace Amesos2 {
 			std::runtime_error,
 			"Column access to row-based object not yet supported.  "
 			"Please contact the Amesos2 developers." );
-    return 0;
   }
 
   template <typename Scalar,

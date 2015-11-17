@@ -415,42 +415,33 @@ makeSolverManagerFromEnum (const EBelosSolverType solverType,
   case SOLVER_TYPE_BLOCK_GMRES: {
     typedef BlockGmresSolMgr<Scalar, MV, OP> impl_type;
     return makeSolverManagerTmpl<base_type, impl_type> (params);
-    break;
   }
   case SOLVER_TYPE_PSEUDO_BLOCK_GMRES: {
     typedef PseudoBlockGmresSolMgr<Scalar, MV, OP> impl_type;
-    return makeSolverManagerTmpl<base_type, impl_type> (params);
-    break;
   }
   case SOLVER_TYPE_BLOCK_CG: {
     typedef BlockCGSolMgr<Scalar, MV, OP> impl_type;
     return makeSolverManagerTmpl<base_type, impl_type> (params);
-    break;
   }
   case SOLVER_TYPE_PSEUDO_BLOCK_CG: {
     typedef PseudoBlockCGSolMgr<Scalar, MV, OP> impl_type;
     return makeSolverManagerTmpl<base_type, impl_type> (params);
-    break;
   }
   case SOLVER_TYPE_GCRODR: {
     typedef GCRODRSolMgr<Scalar, MV, OP> impl_type;
     return makeSolverManagerTmpl<base_type, impl_type> (params);
-    break;
   }
   case SOLVER_TYPE_RCG: {
     typedef RCGSolMgr<Scalar, MV, OP> impl_type;
     return makeSolverManagerTmpl<base_type, impl_type> (params);
-    break;
   }
   case SOLVER_TYPE_MINRES: {
     typedef MinresSolMgr<Scalar, MV, OP> impl_type;
     return makeSolverManagerTmpl<base_type, impl_type> (params);
-    break;
   }
   case SOLVER_TYPE_LSQR: {
     typedef LSQRSolMgr<Scalar, MV, OP> impl_type;
     return makeSolverManagerTmpl<base_type, impl_type> (params);
-    break;
   }
   case SOLVER_TYPE_STOCHASTIC_CG: {
     typedef PseudoBlockStochasticCGSolMgr<Scalar, MV, OP> impl_type;
@@ -491,7 +482,6 @@ makeSolverManagerFromEnum (const EBelosSolverType solverType,
   // for an unreachable statement, but it will prevent a warning on
   // other compilers for a "missing return statement at end of
   // non-void function."
-  return Teuchos::null;
 }
 
 template<class SolverManagerBaseType, class SolverManagerType>

@@ -149,7 +149,6 @@ const char* toString(EConj conj)
     case CONJ_ELE:       return "CONJ_ELE";
     default: TEUCHOS_TEST_FOR_EXCEPT(true);
   }
-  return "BAD"; // Should never be called!
 }
 
 
@@ -187,7 +186,6 @@ const char* toString(EOpTransp transp)
     case CONJTRANS:  return "CONJTRANS";
     default: TEUCHOS_TEST_FOR_EXCEPT(true);
   }
-  return "BAD"; // Should never be called!
 }
 
 
@@ -206,7 +204,6 @@ EOpTransp real_trans(EOpTransp transp)
     case CONJTRANS:  return TRANS;
     default: TEUCHOS_TEST_FOR_EXCEPT(true);
   }
-  return NOTRANS; // Will never be called!
 }
 
 
@@ -224,7 +221,6 @@ EOpTransp not_trans( EOpTransp transp )
     case CONJTRANS:  return NOTRANS;
     default: TEUCHOS_TEST_FOR_EXCEPT(true);
   }
-  return NOTRANS; // Will never be called!
 }
 
 
@@ -249,7 +245,6 @@ EOpTransp trans_trans( EOpTransp trans1, EOpTransp trans2 )
     return TRANS;
   else
     TEUCHOS_TEST_FOR_EXCEPT(true);
-  return NOTRANS; // Will never be executed!
 }
 
 
@@ -267,7 +262,6 @@ EConj transToConj( EOpTransp trans )
     case CONJTRANS:  return CONJ_ELE;
     default: TEUCHOS_TEST_FOR_EXCEPT(true);
   }
-  return NONCONJ_ELE; // Will never be called!
 }
 
 /** \brief Convert from <tt>EConj</tt> to <tt>EOpTransp</tt> for forward apply.
@@ -282,7 +276,6 @@ EOpTransp applyConjToTrans( EConj conj )
     case CONJ_ELE:    return CONJ;
     default: TEUCHOS_TEST_FOR_EXCEPT(true);
   }
-  return NOTRANS; // Will never be called!
 }
 
 
@@ -298,7 +291,6 @@ EOpTransp applyTransposeConjToTrans( EConj conj )
     case CONJ_ELE:    return CONJTRANS;
     default: TEUCHOS_TEST_FOR_EXCEPT(true);
   }
-  return NOTRANS; // Will never be called!
 }
 
 /** \brief Determines if a view is a direct view of data or a detached copy of

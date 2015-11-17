@@ -590,7 +590,6 @@ if((solverName == "amesos2_klu2") || (solverName == "klu2") ||
      */
     std::string err_msg = solver_name + " is not enabled or is not supported";
     TEUCHOS_TEST_FOR_EXCEPTION(true, std::invalid_argument, err_msg);
-    return( Teuchos::null );
   }
 
 } // end namespace Amesos2

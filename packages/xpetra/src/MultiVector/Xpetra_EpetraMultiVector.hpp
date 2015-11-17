@@ -306,8 +306,6 @@ namespace Xpetra {
 
     typename dual_view_type::t_dev_um getDeviceLocalView() const {
       throw std::runtime_error("Epetra does not support device views!");
-      typename dual_view_type::t_dev_um ret;
-      return ret; // make compiler happy
     }
 
 #endif
@@ -525,7 +523,6 @@ namespace Xpetra {
     std::string description() const {
       XPETRA_MONITOR("EpetraMultiVectorT::description");
       TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO");
-      return "TODO";
     }
 
     //! Print the object with the given verbosity level to a FancyOStream.
@@ -681,8 +678,6 @@ namespace Xpetra {
 
     typename dual_view_type::t_dev_um getDeviceLocalView() const {
       throw std::runtime_error("Epetra does not support device views!");
-      typename dual_view_type::t_dev_um ret;
-      return ret; // make compiler happy
     }
 
 #endif
@@ -955,8 +950,6 @@ namespace Xpetra {
 
     typename dual_view_type::t_dev_um getDeviceLocalView() const {
       throw std::runtime_error("Epetra does not support device views!");
-      typename dual_view_type::t_dev_um ret;
-      return ret; // make compiler happy
     }
 
 #endif

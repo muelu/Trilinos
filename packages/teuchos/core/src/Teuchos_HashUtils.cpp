@@ -71,7 +71,6 @@ int HashUtils::nextPrime(int newCapacity)
   TEUCHOS_TEST_FOR_EXCEPTION(true,
                      std::logic_error,
                      "unexpected case in HashUtils::nextPrime()");
-	return 0;
 }
 
 /** helper to hash values larger than int to an int.

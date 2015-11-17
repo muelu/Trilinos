@@ -67,7 +67,6 @@ inline RTOpPack::ETransp convertToRTOpPackETransp( const EOpTransp transp )
     default:
       TEUCHOS_TEST_FOR_EXCEPT(true);
   }
-  return RTOpPack::NOTRANS; // will never be called!
 }
 // ToDo: Move the above function into Thyra_OperatorVectorTypes.hpp
 
