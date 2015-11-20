@@ -212,7 +212,6 @@ DefaultBlockedTriangularLinearOpWithSolveFactory<Scalar>::isCompatible(
   ) const
 {
   TEUCHOS_TEST_FOR_EXCEPT(true);
-  return false;
 }
 
 

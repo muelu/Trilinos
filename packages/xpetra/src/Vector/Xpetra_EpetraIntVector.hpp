@@ -281,14 +281,10 @@ namespace Xpetra {
 
     typename dual_view_type::t_host_um getHostLocalView () const {
       throw std::runtime_error("EpetraIntVector does not support device views! Must be implemented extra...");
-      typename dual_view_type::t_host_um ret;
-      return ret;
     }
 
     typename dual_view_type::t_dev_um getDeviceLocalView() const {
       throw std::runtime_error("Epetra does not support device views!");
-      typename dual_view_type::t_dev_um ret;
-      return ret; // make compiler happy
     }
 
     /// \brief Return an unmanaged non-const view of the local data on a specific device.

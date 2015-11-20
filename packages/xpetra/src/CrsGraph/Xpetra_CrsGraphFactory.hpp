@@ -85,7 +85,6 @@ namespace Xpetra {
 
       XPETRA_FACTORY_ERROR_IF_EPETRA(map->lib());
       XPETRA_FACTORY_END;
-      return null;
     }
   };
 
@@ -123,7 +122,6 @@ namespace Xpetra {
 #endif
 
       XPETRA_FACTORY_END;
-      return null;
     }
 
   };

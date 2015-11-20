@@ -62,22 +62,22 @@ namespace Xpetra {
   void EpetraIntVectorT<EpetraGlobalOrdinal, Node>::sumIntoLocalValue(LocalOrdinal myRow, const Scalar &value) { XPETRA_MONITOR("EpetraIntVectorT::sumIntoLocalValue"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO"); }
 
   template<class EpetraGlobalOrdinal, class Node>
-  int EpetraIntVectorT<EpetraGlobalOrdinal, Node>::dot(const Vector<int,int,GlobalOrdinal,Node> &a) const { XPETRA_MONITOR("EpetraIntVectorT::dot"); TEUCHOS_TEST_FOR_EXCEPTION(-1, Xpetra::Exceptions::NotImplemented, "TODO"); return -1; }
+  int EpetraIntVectorT<EpetraGlobalOrdinal, Node>::dot(const Vector<int,int,GlobalOrdinal,Node> &a) const { XPETRA_MONITOR("EpetraIntVectorT::dot"); TEUCHOS_TEST_FOR_EXCEPTION(-1, Xpetra::Exceptions::NotImplemented, "TODO"); }
 
   template<class EpetraGlobalOrdinal, class Node>
-  Teuchos::ScalarTraits<int>::magnitudeType EpetraIntVectorT<EpetraGlobalOrdinal, Node>::norm1() const { XPETRA_MONITOR("EpetraIntVectorT::norm1"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO"); return -1; }
+  Teuchos::ScalarTraits<int>::magnitudeType EpetraIntVectorT<EpetraGlobalOrdinal, Node>::norm1() const { XPETRA_MONITOR("EpetraIntVectorT::norm1"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO"); }
 
   template<class EpetraGlobalOrdinal, class Node>
-  Teuchos::ScalarTraits<int>::magnitudeType EpetraIntVectorT<EpetraGlobalOrdinal, Node>::norm2() const { XPETRA_MONITOR("EpetraIntVectorT::norm2"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO"); return -1; }
+  Teuchos::ScalarTraits<int>::magnitudeType EpetraIntVectorT<EpetraGlobalOrdinal, Node>::norm2() const { XPETRA_MONITOR("EpetraIntVectorT::norm2"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO"); }
 
   template<class EpetraGlobalOrdinal, class Node>
-  Teuchos::ScalarTraits<int>::magnitudeType EpetraIntVectorT<EpetraGlobalOrdinal, Node>::normInf() const { XPETRA_MONITOR("EpetraIntVectorT::normInf"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO"); return -1; }
+  Teuchos::ScalarTraits<int>::magnitudeType EpetraIntVectorT<EpetraGlobalOrdinal, Node>::normInf() const { XPETRA_MONITOR("EpetraIntVectorT::normInf"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO"); }
 
   template<class EpetraGlobalOrdinal, class Node>
-  int EpetraIntVectorT<EpetraGlobalOrdinal, Node>::meanValue() const { XPETRA_MONITOR("EpetraIntVectorT::meanValue"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO"); return -1; }
+  int EpetraIntVectorT<EpetraGlobalOrdinal, Node>::meanValue() const { XPETRA_MONITOR("EpetraIntVectorT::meanValue"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO"); }
 
   template<class EpetraGlobalOrdinal, class Node>
-  int EpetraIntVectorT<EpetraGlobalOrdinal, Node>::maxValue() const { XPETRA_MONITOR("EpetraIntVectorT::maxValue"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO"); return -1; }
+  int EpetraIntVectorT<EpetraGlobalOrdinal, Node>::maxValue() const { XPETRA_MONITOR("EpetraIntVectorT::maxValue"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "TODO"); }
 
   template<class EpetraGlobalOrdinal, class Node>
   void EpetraIntVectorT<EpetraGlobalOrdinal, Node>::randomize(bool bUseXpetraImplementation) { XPETRA_MONITOR("EpetraIntVectorT::randomize"); TEUCHOS_TEST_FOR_EXCEPTION(1, Xpetra::Exceptions::NotImplemented, "Xpetra::EpetraIntVectorT::randomize(): Functionnality not available in Epetra"); }

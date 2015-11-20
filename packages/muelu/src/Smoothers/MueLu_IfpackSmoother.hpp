@@ -206,7 +206,6 @@ namespace MueLu {
                      const LocalOrdinal& overlap = 0)
   {
     TEUCHOS_TEST_FOR_EXCEPTION(true, Exceptions::RuntimeError, "IfpackSmoother cannot be used with Scalar != double, LocalOrdinal != int, GlobalOrdinal != int");
-    return Teuchos::null;
   }
 
   // Specialization for serial node (used for Epetra)

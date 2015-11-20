@@ -478,19 +478,13 @@ inline double& Ifpack_SerialTriDiMatrix::operator () (int RowIndex, int ColIndex
  case -1:
    // DL
    return DL_[ColIndex];
-   break;
  case 0:
    return D_[ColIndex];
-   break;
  case 1:
    return DU_[RowIndex];
-   break;
  default:
    throw ReportError("Row index = " +toString(RowIndex) + " differs from Col_Index " + toString(ColIndex) +" Out of Range -1 to 1",1);
-   return D_[0]; // ultimate badness, should never get here
  }
- throw ReportError("Row index = " +toString(RowIndex) + " differs from Col_Index " + toString(ColIndex) + " Out of Range -1 to 1",1);
- return D_[0]; // ultimat badness, should never get here
 }
 //=========================================================================
 inline const double& Ifpack_SerialTriDiMatrix::operator () (int RowIndex, int ColIndex) const {
@@ -510,18 +504,13 @@ inline const double& Ifpack_SerialTriDiMatrix::operator () (int RowIndex, int Co
  case -1:
    // DL
    return DL_[ColIndex];
-   break;
  case 0:
    return D_[ColIndex];
-   break;
  case 1:
    return DU_[RowIndex];
-   break;
  default:
    throw ReportError("Row index = " +toString(RowIndex) + " differs from Col_Index " + toString(ColIndex) + " Out of Range -1 to 1",-2);
-  return D_[0]; // Ultimate badness, should never get here.
  }
- return D_[0]; // Crime against humanity, should never get here. 
 }
 
 

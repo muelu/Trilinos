@@ -119,7 +119,6 @@ MACRO(TRIBITS_DEFINE_STANDARD_COMPILE_FLAGS_VARS  ENABLE_SHADOWING_WARNINGS)
     MULTILINE_SET(CXX_STRONG_COMPILE_WARNING_FLAGS
       ${CXX_STRONG_COMPILE_WARNING_FLAGS}
       " -Wshadow" # Warn about general shadowing issues
-      " -Woverloaded-virtual" # Warn about hiding virtual functions
       )
   ENDIF()
 

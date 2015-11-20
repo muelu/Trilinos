@@ -334,7 +334,6 @@ public:
           case DERIV_TRANS_MV_BY_ROW: return supportsTransMVByRow_;
           default: TEUCHOS_TEST_FOR_EXCEPT(true);
         }
-        return false; // Will never be called!
       }
     /** \brief . */
     bool isSameSupport(const DerivativeSupport &derivSupport) const

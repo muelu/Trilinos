@@ -567,7 +567,6 @@ bool EpetraLinearOp::rowStatIsSupportedImpl(
     default:
       TEUCHOS_TEST_FOR_EXCEPT(true);
   }
-  return false; // Will never be called!
 }
 
 

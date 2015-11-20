@@ -518,7 +518,6 @@ void ModelEvaluatorBase::InArgs<Scalar>::_setUnsupportsAndRelated(
         true ,std::logic_error,
         "Error, can not handle args other than IN_ARG_x yet!"
         );
-      break;
   }
   this->_setSupports(arg,false);
 }
@@ -1945,7 +1944,6 @@ void ModelEvaluatorBase::OutArgs<Scalar>::_setUnsupportsAndRelated(
         true ,std::logic_error,
         "Error, can not handle args other than IN_ARG_x yet!"
         );
-      break;
   }
 }
 
@@ -1979,7 +1977,6 @@ void ModelEvaluatorBase::OutArgs<Scalar>::_setUnsupportsAndRelated(
         true ,std::logic_error,
         "Error, can not handle args other than OUT_ARG_f yet!"
         );
-      break;
   }
   this->_setSupports(arg,false);
 }

@@ -112,7 +112,6 @@ StateFuncModelEvaluatorBase<Scalar>::get_p_space(int l) const
     ,"ModelEvaluator<"<<Teuchos::ScalarTraits<Scalar>::name()<<">::get_p_space(l): "
     "Error, this function was not overridden in *this = \'"<<this->description()<<"\'!"
     );
-  return Teuchos::null; // Should never be called!
 }
 
 
@@ -125,7 +124,6 @@ StateFuncModelEvaluatorBase<Scalar>::get_p_names(int l) const
     ,"ModelEvaluator<"<<Teuchos::ScalarTraits<Scalar>::name()<<">::get_p_names(l): "
     "Error, this function was not overridden in *this = \'"<<this->description()<<"\'!"
     );
-  return Teuchos::null; // Should never be called!
 }
 
 
@@ -139,7 +137,6 @@ StateFuncModelEvaluatorBase<Scalar>::get_g_space(int j) const
     " Error, this function was not overridden in \'"
     <<this->description()<<"\'!"
     );
-  return Teuchos::null; // Should never be called!
 }
 
 
@@ -152,7 +149,6 @@ StateFuncModelEvaluatorBase<Scalar>::get_g_names(int j) const
     ,"ModelEvaluator<"<<Teuchos::ScalarTraits<Scalar>::name()<<">::get_g_names(j): "
     "Error, this function was not overridden in *this = \'"<<this->description()<<"\'!"
     );
-  return Teuchos::ArrayView<const std::string>(Teuchos::null); // Should never be called!
 }
 
 
@@ -184,7 +180,6 @@ StateFuncModelEvaluatorBase<Scalar>::create_W_op() const
     " this function create_W_op() must be overridden by the subclass "
     <<this->description()<<" to return a non-null object!"
     );
-  return Teuchos::null; // Should never be called!
 }
 
 

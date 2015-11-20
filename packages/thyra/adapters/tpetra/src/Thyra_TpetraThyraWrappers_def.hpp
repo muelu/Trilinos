@@ -267,7 +267,6 @@ getTpetraMultiVector(const RCP<MultiVectorBase<Scalar> > &mv)
     "Error, the input mv = " << mv->description() << " does not support the"
     " Thyra::TpetraMultiVector or the Thyra::TpetraVector interfaces!");
 
-  return Teuchos::null;
 
 }
 
@@ -304,7 +303,6 @@ getConstTpetraMultiVector(const RCP<const MultiVectorBase<Scalar> > &mv)
     "Error, the input mv = " << mv->description() << " does not support the"
     " Thyra::TpetraMultiVector or the Thyra::TpetraVector interfaces!");
 
-  return Teuchos::null;
 
 }
 

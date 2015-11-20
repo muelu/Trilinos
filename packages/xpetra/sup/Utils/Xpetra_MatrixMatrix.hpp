@@ -437,7 +437,6 @@ public:
       const Epetra_CrsMatrix& epB,
       Teuchos::FancyOStream& fos) {
     throw(Xpetra::Exceptions::RuntimeError("MLTwoMatrixMultiply only available for SC=double and GO=LO=int."));
-    return Teuchos::null;
   }
 #endif //ifdef HAVE_XPETRA_EPETRAEXT
 
@@ -1010,7 +1009,6 @@ public:
 #else // no MUELU_ML
     TEUCHOS_TEST_FOR_EXCEPTION(true, Xpetra::Exceptions::RuntimeError,
         "No ML multiplication available. This feature is currently not supported by Xpetra.");
-    return Teuchos::null;
 #endif
   }
 #endif //ifdef HAVE_XPETRA_EPETRAEXT

@@ -384,7 +384,6 @@ Ifpack_Preconditioner* Ifpack::Create(EPrecType PrecType,
       // (EPrecType)(anyNumber).  You can never get here by passing in a
       // std::string value for the preconditioner!
   } // end switch
-  return 0; // This will never ever be executed!
 }
 
 //==============================================================================
