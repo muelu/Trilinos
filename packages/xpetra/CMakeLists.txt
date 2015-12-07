@@ -157,7 +157,18 @@ IF (${PACKAGE_NAME}_ENABLE_Tpetra)
   GLOBAL_SET (HAVE_XPETRA_CUDA    ${Tpetra_INST_CUDA})
 ENDIF()
 IF (${PACKAGE_NAME}_ENABLE_Epetra)
-  # If Epetra is active, enable Serial node
+  # If Epetra is active, check for Serial node
+  IF (${PACKAGE_NAME}_ENABLE_Tpetra)
+    # Both Epetra and Tpetra are enabled. For Epetra we then need the serial node.
+    # TAW: 11/23/2015 phone conference with JJH and CSF:
+    # Even though Kokkos::SerialNode "should" be sufficient, we request Tpetra also
+    # instantiated on the SerialNode.
+    IF (NOT ${Tpetra_INST_SERIAL})
+      MESSAGE(FATAL_ERROR "If both Epetra and Tpetra are enabled you also have to enable the SerialNode in Tpetra. Please set Tpetra_INST_SERIAL = ON in your configuration.")
+    ENDIF ()
+  ENDIF ()
+  # Enable serial node for Epetra
+  # For the Epetra-only case we use the FakeKokkos Node.
   GLOBAL_SET (HAVE_XPETRA_SERIAL  ON)
 ENDIF ()
 
