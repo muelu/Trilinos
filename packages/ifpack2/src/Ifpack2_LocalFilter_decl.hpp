@@ -253,6 +253,9 @@ public:
   virtual ~LocalFilter();
 
   //@}
+
+  void resetMatrix(const Teuchos::RCP<const row_matrix_type>& A);
+
   //! \name Matrix Query Methods
   //@{
 

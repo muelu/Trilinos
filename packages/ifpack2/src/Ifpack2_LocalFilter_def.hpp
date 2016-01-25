@@ -287,6 +287,11 @@ LocalFilter (const Teuchos::RCP<const row_matrix_type>& A) :
   MaxNumEntries_ = ActualMaxNumEntries;
 }
 
+template<class MatrixType>
+void LocalFilter<MatrixType>::
+resetMatrix(const Teuchos::RCP<const row_matrix_type>& A) {
+  A_ = A;
+}
 
 template<class MatrixType>
 LocalFilter<MatrixType>::~LocalFilter()
