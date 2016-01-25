@@ -115,6 +115,50 @@ RILUK<MatrixType>::setMatrix (const Teuchos::RCP<const row_matrix_type>& A)
   }
 }
 
+template<class MatrixType>
+void
+RILUK<MatrixType>::resetMatrix (const Teuchos::RCP<const row_matrix_type>& A) {
+  using Teuchos::RCP;
+  using Teuchos::rcp_const_cast;
+  using Teuchos::rcp_dynamic_cast;
+  using Teuchos::rcp_implicit_cast;
+
+  A_ = A;
+
+  TEUCHOS_TEST_FOR_EXCEPTION(A.is_null(), std::runtime_error,
+    "Ifpack2:RILUK:resetMatrix: Input matrix A cannot be null.");
+
+  TEUCHOS_TEST_FOR_EXCEPTION(!isInitialized_, std::runtime_error,
+    "Ifpack2:RILUK:resetMatrix: the preconditioner must have been initialized prior to the call.");
+
+  Teuchos::Time timer1 ("RILUK::resetMatrix:makeLocalFilter");
+  {
+    Teuchos::TimeMonitor timeMon (timer1); // start timing
+
+    RCP<const LocalFilter<row_matrix_type> > A_local_filter =
+        rcp_dynamic_cast<const LocalFilter<row_matrix_type> > (A_local_);
+    if (! A_local_filter.is_null ()) {
+      rcp_const_cast<LocalFilter<row_matrix_type> >(A_local_filter)->resetMatrix(A_);
+    }
+    else {
+      A_local_ = makeLocalFilter(A_);
+    }
+  }
+
+  Teuchos::Time timer2 ("RILUK::resetMatrix:initAllValues");
+  {
+    Teuchos::TimeMonitor timeMon (timer2); // start timing
+
+    initAllValues (*A_local_);
+  }
+
+  isAllocated_   = true;
+  isInitialized_ = true;
+  isComputed_    = false;
+
+  numInitialize_ = 0;
+  initializeTime_ = timer1.totalElapsedTime() + timer2.totalElapsedTime();
+}
 
 
 template<class MatrixType>
