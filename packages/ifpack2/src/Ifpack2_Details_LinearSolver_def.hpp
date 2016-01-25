@@ -122,6 +122,40 @@ setMatrix (const Teuchos::RCP<const OP>& A)
 }
 
 template<class SC, class LO, class GO, class NT>
+void
+LinearSolver<SC, LO, GO, NT>::
+resetMatrix (const Teuchos::RCP<const OP>& A)
+{
+  using Teuchos::RCP;
+  using Teuchos::rcp_dynamic_cast;
+  typedef Tpetra::RowMatrix<SC, LO, GO, NT> row_matrix_type;
+  typedef ::Ifpack2::Details::CanChangeMatrix<row_matrix_type> mixin_type;
+  const char prefix[] = "Ifpack2::Details::LinearSolver::setMatrix: ";
+
+  // It's not OK for the input matrix to be null, as it should preserve the
+  // structure of the original matrix.
+  TEUCHOS_TEST_FOR_EXCEPTION(A.is_null(), std::runtime_error, "A is null");
+  RCP<const row_matrix_type> A_row = rcp_dynamic_cast<const row_matrix_type> (A);
+  TEUCHOS_TEST_FOR_EXCEPTION
+      (A_row.is_null (), std::invalid_argument, prefix << "The input matrix A must be a Tpetra::RowMatrix.");
+  TEUCHOS_TEST_FOR_EXCEPTION
+    (solver_.is_null (), std::logic_error, prefix << "Solver is NULL.  "
+     "This should never happen!  Please report this bug to the Ifpack2 "
+     "developers.");
+
+  RCP<mixin_type> innerSolver = rcp_dynamic_cast<mixin_type> (solver_);
+  TEUCHOS_TEST_FOR_EXCEPTION
+    (innerSolver.is_null (), std::logic_error, prefix << "The solver does not "
+     "implement the setMatrix() feature.  Only input preconditioners that "
+     "inherit from Ifpack2::Details::CanChangeMatrix implement this.  We should"
+     " never get here!  Please report this bug to the Ifpack2 developers.");
+
+  innerSolver->resetMatrix (A_row);
+
+  A_ = A; // keep a pointer to A, so that getMatrix() works
+}
+
+template<class SC, class LO, class GO, class NT>
 Teuchos::RCP<const typename LinearSolver<SC, LO, GO, NT>::OP>
 LinearSolver<SC, LO, GO, NT>::
 getMatrix () const {

@@ -135,6 +135,12 @@ public:
   ///   AX=B to solve.
   void setMatrix (const Teuchos::RCP<const OP>& A);
 
+  /// \brief Reset the solver's matrix (reuse).
+  ///
+  /// \param A [in] Pointer to the matrix A in the linear system(s)
+  ///   AX=B to solve.
+  void resetMatrix (const Teuchos::RCP<const OP>& A);
+
   //! Get the solver's matrix.
   Teuchos::RCP<const OP> getMatrix () const;
 
