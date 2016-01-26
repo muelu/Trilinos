@@ -1705,6 +1705,119 @@ setMatrix (const Teuchos::RCP<const row_matrix_type>& A)
   }
 }
 
+template<class MatrixType, class LocalInverseType>
+void AdditiveSchwarz<MatrixType, LocalInverseType>::resetMatrix (const Teuchos::RCP<const row_matrix_type>& A) {
+  using Teuchos::rcp;
+  using Teuchos::RCP;
+  using Teuchos::rcp_const_cast;
+  using Teuchos::rcp_dynamic_cast;
+
+  Matrix_ = A;
+
+  if (IsOverlapping_) {
+    const std::string timerName(prefix + "construct overlap");
+    RCP<Teuchos::Time> timer = Teuchos::TimeMonitor::lookupCounter(timerName);
+    if (timer.is_null()) timer = Teuchos::TimeMonitor::getNewCounter(timerName);
+    Teuchos::TimeMonitor timeMon (*timer); // start timing
+
+    typedef OverlappingRowMatrix<row_matrix_type> overlap_mat_type;
+    RCP<overlap_mat_type> overlapMatrix = rcp_dynamic_cast<overlap_mat_type> (OverlappingMatrix_);
+    TEUCHOS_TEST_FOR_EXCEPTION
+        (overlapMatrix.is_null (), std::logic_error, prefix <<
+         "IsOverlapping_ is true, but OverlappingMatrix_, while nonnull, is "
+         "not an OverlappingRowMatrix<row_matrix_type>.  Please report this "
+         "bug to the Ifpack2 developers.");
+
+    overlapMatrix->resetMatrix(Matrix_);
+  }
+
+  // ================================================================================
+  // The code below is identical to setup(), with couple simplifications:
+  //   - for now, we assume no reordering; later we can keep reordering information
+  //   - for now, assume inner Invers_ is always non-null
+  //   - call resetMatrix instead of setMatrix
+  // ================================================================================
+
+  // Localized version of Matrix_ or OverlappingMatrix_.
+  RCP<row_matrix_type> LocalizedMatrix;
+
+  // The "most current local matrix."  At the end of this method, this
+  // will be handed off to the inner solver.
+  RCP<row_matrix_type> ActiveMatrix;
+
+  // Create localized matrix.
+  {
+    const std::string timerName(prefix + "construct localized");
+    RCP<Teuchos::Time> timer = Teuchos::TimeMonitor::lookupCounter(timerName);
+    if (timer.is_null()) timer = Teuchos::TimeMonitor::getNewCounter(timerName);
+    Teuchos::TimeMonitor timeMon (*timer); // start timing
+
+    // FIXME We can skip LocalFilter construction if we store LocalizedMatrix_
+    // Then we can dynamically cast to LocalFilter, and if it is successfull,
+    // to resetMatrix
+    if (! OverlappingMatrix_.is_null ()) {
+      LocalizedMatrix = rcp(new LocalFilter<row_matrix_type> (OverlappingMatrix_));
+    }
+    else {
+      LocalizedMatrix = rcp(new LocalFilter<row_matrix_type> (Matrix_));
+    }
+  }
+
+  // Sanity check; I don't trust the logic above to have created LocalizedMatrix.
+  TEUCHOS_TEST_FOR_EXCEPTION(
+    LocalizedMatrix.is_null (), std::logic_error, prefix <<
+    "LocalizedMatrix is null, after the code that claimed to have created it. "
+    "This should never be the case. Please report this bug to the Ifpack2 developers.");
+
+  // Mark localized matrix as active
+  ActiveMatrix = LocalizedMatrix;
+
+  // Singleton Filtering
+  if (FilterSingletons_) {
+    SingletonMatrix_ = rcp (new SingletonFilter<row_matrix_type> (LocalizedMatrix));
+    ActiveMatrix = SingletonMatrix_;
+  }
+
+  // Do reordering
+  if (UseReordering_) {
+    typedef ReorderFilter<row_matrix_type> reorder_filter_type;
+
+    RCP<reorder_filter_type> ReorderedLocalizedMatrix =
+      rcp_dynamic_cast<reorder_filter_type>(ReorderedLocalizedMatrix_);
+
+    ReorderedLocalizedMatrix->resetMatrix(ActiveMatrix);
+
+    ActiveMatrix = ReorderedLocalizedMatrix_;
+  }
+
+  innerMatrix_ = ActiveMatrix;
+
+  TEUCHOS_TEST_FOR_EXCEPTION(
+    innerMatrix_.is_null (), std::logic_error, prefix <<
+    "resetMatr: Inner matrix is null right before constructing inner solver.  "
+    "Please report this bug to the Ifpack2 developers.");
+
+  // Construct the inner solver if necessary.
+  TEUCHOS_TEST_FOR_EXCEPTION(Inverse_.is_null (), std::runtime_error, "No null Inverse_ for now");
+
+  // The inner matrix may or may not be different from the inner
+  // preconditioner's current matrix, so we don't check for it
+  typedef Details::LinearSolver<scalar_type, local_ordinal_type, global_ordinal_type, node_type> Ifpack2LinearSolver;
+  RCP<Ifpack2LinearSolver> InverseChange = rcp_dynamic_cast<Ifpack2LinearSolver>(Inverse_);
+  if ( !InverseChange.is_null() )
+    InverseChange->resetMatrix(innerMatrix_);
+  else
+    Inverse_->setMatrix(innerMatrix_);
+
+  TEUCHOS_TEST_FOR_EXCEPTION(
+    Inverse_.is_null (), std::logic_error, "Ifpack2::AdditiveSchwarz::"
+    "setup: Inverse_ is null right after we were supposed to have created it."
+    "  Please report this bug to the Ifpack2 developers.");
+
+  IsInitialized_ = true;
+  IsComputed_ = false;
+}
+
 } // namespace Ifpack2
 
 // NOTE (mfh 26 Aug 2015) There's no need to instantiate for CrsMatrix
