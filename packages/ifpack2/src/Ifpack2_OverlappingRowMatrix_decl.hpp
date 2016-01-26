@@ -348,6 +348,10 @@ public:
                      Tpetra::CombineMode CM = Tpetra::ADD);
   //@}
 
+  /// \brief Change the matrix for the overlap.
+  virtual void
+  resetMatrix (const Teuchos::RCP<const row_matrix_type>& A);
+
   std::string description() const;
 
   void describe(Teuchos::FancyOStream &out, const Teuchos::EVerbosityLevel verbLevel) const;

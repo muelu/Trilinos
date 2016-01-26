@@ -889,6 +889,28 @@ OverlappingRowMatrix<MatrixType>::getUnderlyingMatrix() const
   return A_;
 }
 
+/// \brief Change the matrix for the overlap.
+template<class MatrixType>
+void OverlappingRowMatrix<MatrixType>::resetMatrix (const Teuchos::RCP<const row_matrix_type>& A) {
+  using Teuchos::RCP;
+  using Teuchos::rcp_dynamic_cast;
+  A_ = A;
+
+#if 1
+  // Ideally, we would not have to construct a new matrix
+  // But that does not work right now (doImport throws), so first we blow away
+  // the existing matrix
+  ExtMatrix_ = rcp (new crs_matrix_type (ExtMap_, ColMap_, 0));
+#endif
+
+  RCP<const crs_matrix_type> ACRS =
+    rcp_dynamic_cast<const crs_matrix_type, const row_matrix_type> (A_);
+  RCP<crs_matrix_type> ExtMatrixCRS =
+    rcp_dynamic_cast<crs_matrix_type, row_matrix_type> (ExtMatrix_);
+
+  ExtMatrixCRS->doImport (*ACRS, *ExtImporter_, Tpetra::INSERT);
+  ExtMatrixCRS->fillComplete (A_->getDomainMap (), RowMap_);
+}
 
 } // namespace Ifpack2
 
