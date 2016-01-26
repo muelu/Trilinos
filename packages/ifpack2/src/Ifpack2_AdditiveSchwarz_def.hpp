@@ -1714,6 +1714,8 @@ void AdditiveSchwarz<MatrixType, LocalInverseType>::resetMatrix (const Teuchos::
 
   Matrix_ = A;
 
+  std::string prefix = "Ifpack2::AdditiveSchwarz::resetMatrix: ";
+
   if (IsOverlapping_) {
     const std::string timerName(prefix + "construct overlap");
     RCP<Teuchos::Time> timer = Teuchos::TimeMonitor::lookupCounter(timerName);
@@ -1804,10 +1806,21 @@ void AdditiveSchwarz<MatrixType, LocalInverseType>::resetMatrix (const Teuchos::
   // preconditioner's current matrix, so we don't check for it
   typedef Details::LinearSolver<scalar_type, local_ordinal_type, global_ordinal_type, node_type> Ifpack2LinearSolver;
   RCP<Ifpack2LinearSolver> InverseChange = rcp_dynamic_cast<Ifpack2LinearSolver>(Inverse_);
-  if ( !InverseChange.is_null() )
+  if ( !InverseChange.is_null() ) {
+    const std::string timerName(prefix + "RILUK resetMatrix");
+    RCP<Teuchos::Time> timer = Teuchos::TimeMonitor::lookupCounter(timerName);
+    if (timer.is_null()) timer = Teuchos::TimeMonitor::getNewCounter(timerName);
+    Teuchos::TimeMonitor timeMon (*timer); // start timing
+
     InverseChange->resetMatrix(innerMatrix_);
-  else
+  } else {
+    const std::string timerName(prefix + "RILUK setMatrix");
+    RCP<Teuchos::Time> timer = Teuchos::TimeMonitor::lookupCounter(timerName);
+    if (timer.is_null()) timer = Teuchos::TimeMonitor::getNewCounter(timerName);
+    Teuchos::TimeMonitor timeMon (*timer); // start timing
+
     Inverse_->setMatrix(innerMatrix_);
+  }
 
   TEUCHOS_TEST_FOR_EXCEPTION(
     Inverse_.is_null (), std::logic_error, "Ifpack2::AdditiveSchwarz::"

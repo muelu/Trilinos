@@ -131,9 +131,11 @@ RILUK<MatrixType>::resetMatrix (const Teuchos::RCP<const row_matrix_type>& A) {
   TEUCHOS_TEST_FOR_EXCEPTION(!isInitialized_, std::runtime_error,
     "Ifpack2:RILUK:resetMatrix: the preconditioner must have been initialized prior to the call.");
 
-  Teuchos::Time timer1 ("RILUK::resetMatrix:makeLocalFilter");
   {
-    Teuchos::TimeMonitor timeMon (timer1); // start timing
+    const std::string timerName("RILUK::resetMatrix:makeLocalFilter");
+    RCP<Teuchos::Time> timer = Teuchos::TimeMonitor::lookupCounter(timerName);
+    if (timer.is_null()) timer = Teuchos::TimeMonitor::getNewCounter(timerName);
+    Teuchos::TimeMonitor timeMon (*timer); // start timing
 
     RCP<const LocalFilter<row_matrix_type> > A_local_filter =
         rcp_dynamic_cast<const LocalFilter<row_matrix_type> > (A_local_);
@@ -157,7 +159,7 @@ RILUK<MatrixType>::resetMatrix (const Teuchos::RCP<const row_matrix_type>& A) {
   isComputed_    = false;
 
   numInitialize_ = 0;
-  initializeTime_ = timer1.totalElapsedTime() + timer2.totalElapsedTime();
+  // initializeTime_ = timer1.totalElapsedTime() + timer2.totalElapsedTime();
 }
 
 
