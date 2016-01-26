@@ -221,7 +221,7 @@ LocalFilter (const Teuchos::RCP<const row_matrix_type>& A) :
   // If the original matrix's domain Map is not fitted to its column
   // Map, we'll have to do an Import when applying the matrix.
   const size_t numCols = A_->getDomainMap ()->getNodeNumElements ();
-  if (A_->getRangeMap ().getRawPtr () == A_->getDomainMap ().getRawPtr ()) {
+  if (A_->getRangeMap()->isSameAs(*A_->getDomainMap())) {
     // The input matrix's domain and range Maps are identical, so the
     // locally filtered matrix's domain and range Maps can be also.
     localDomainMap_ = localRangeMap_;
