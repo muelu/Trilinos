@@ -60,6 +60,8 @@
 #include <Ifpack2_CreateOverlapGraph.hpp>
 #include <Ifpack2_Parameters.hpp>
 
+#include <MatrixMarket_Tpetra.hpp>
+
 namespace Ifpack2 {
 
 /// \class IlukGraph
@@ -108,6 +110,10 @@ public:
   typedef Tpetra::CrsGraph<local_ordinal_type,
                            global_ordinal_type,
                            node_type> crs_graph_type;
+private:
+  typedef typename GraphType::map_type map_type;
+
+public:
 
   /// \brief Constructor.
   ///
@@ -163,7 +169,7 @@ public:
   }
 
   //! Returns the the overlapped graph.
-  Teuchos::RCP<const crs_graph_type> getOverlapGraph () const {
+  Teuchos::RCP<const row_graph_type> getOverlapGraph () const {
     return OverlapGraph_;
   }
 
@@ -171,8 +177,6 @@ public:
   size_t getNumGlobalDiagonals() const { return NumGlobalDiagonals_; }
 
 private:
-  typedef typename GraphType::map_type map_type;
-
   /// \brief Copy constructor (UNIMPLEMENTED; DO NOT USE).
   ///
   /// This copy constructor is declared private and unimplemented, in
@@ -197,11 +201,12 @@ private:
   void constructOverlapGraph();
 
   Teuchos::RCP<const GraphType> Graph_;
-  Teuchos::RCP<const crs_graph_type> OverlapGraph_;
+  Teuchos::RCP<const GraphType> OverlapGraph_;
   int LevelFill_;
   int LevelOverlap_;
   Teuchos::RCP<crs_graph_type> L_Graph_;
   Teuchos::RCP<crs_graph_type> U_Graph_;
+
   size_t NumMyDiagonals_;
   size_t NumGlobalDiagonals_;
 };
@@ -239,9 +244,8 @@ void IlukGraph<GraphType>::constructOverlapGraph () {
   // FIXME (mfh 22 Dec 2013) This won't do if we want
   // RILUK::initialize() to do the right thing (that is,
   // unconditionally recompute the "symbolic factorization").
-  if (OverlapGraph_ == Teuchos::null) {
-    OverlapGraph_ = createOverlapGraph<GraphType> (Graph_, LevelOverlap_);
-  }
+  if (OverlapGraph_ == Teuchos::null)
+    OverlapGraph_ = createOverlapGraph<GraphType>(Graph_, LevelOverlap_);
 }
 
 
@@ -278,9 +282,17 @@ void IlukGraph<GraphType>::initialize()
   const int NumMyRows = OverlapGraph_->getRowMap ()->getNodeNumElements ();
   NumMyDiagonals_ = 0;
 
-  for (int i = 0; i< NumMyRows; ++i) {
-    ArrayView<const local_ordinal_type> my_indices;
-    OverlapGraph_->getLocalRowView (i, my_indices);
+  RCP<const crs_graph_type> OverlapGraphCrs = Teuchos::rcp_dynamic_cast<const crs_graph_type>(OverlapGraph_);
+  bool isCrsGraph = (OverlapGraphCrs != Teuchos::null);
+  Array    <local_ordinal_type> my_indices_array(MaxNumIndices);
+  ArrayView<const local_ordinal_type> my_indices;
+  for (int i = 0; i < NumMyRows; ++i) {
+    if (isCrsGraph) {
+      OverlapGraphCrs->getLocalRowView (i, my_indices);
+    } else {
+      OverlapGraph_->getLocalRowCopy (i, my_indices_array(), NumIn);
+      my_indices = my_indices_array.view(0, NumIn);
+    }
 
     // Split into L and U (we don't assume that indices are ordered).
 
@@ -292,9 +304,9 @@ void IlukGraph<GraphType>::initialize()
     for (size_t j = 0; j < NumIn; ++j) {
       const local_ordinal_type k = my_indices[j];
 
-      if (k<NumMyRows) { // Ignore column elements that are not in the square matrix
+      if (k < NumMyRows) { // Ignore column elements that are not in the square matrix
 
-        if (k==i) {
+        if (k == i) {
           DiagFound = true;
         }
         else if (k < i) {

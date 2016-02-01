@@ -350,15 +350,10 @@ LocalFilter<MatrixType>::getRangeMap() const
 
 
 template<class MatrixType>
-Teuchos::RCP<const Tpetra::RowGraph<typename MatrixType::local_ordinal_type,
-                                     typename MatrixType::global_ordinal_type,
-                                     typename MatrixType::node_type> >
+Teuchos::RCP<const typename LocalFilter<MatrixType>::row_graph_type>
 LocalFilter<MatrixType>::getGraph () const
 {
-  // FIXME (mfh 20 Nov 2013) This is not what the documentation says
-  // this method should do!  It should return the graph of the locally
-  // filtered matrix, not the original matrix's graph.
-  return A_->getGraph ();
+  return Teuchos::rcp(dynamic_cast<const row_graph_type*>(this), false);
 }
 
 
@@ -571,6 +566,18 @@ getGlobalRowCopy (global_ordinal_type globalRow,
 template<class MatrixType>
 void
 LocalFilter<MatrixType>::
+getGlobalRowCopy (global_ordinal_type globalRow,
+                  const Teuchos::ArrayView<global_ordinal_type>& globalIndices,
+                  size_t& numEntries) const
+{
+  Teuchos::Array<scalar_type> globalValues(globalIndices.size());
+  getGlobalRowCopy(globalRow, globalIndices, globalValues, numEntries);
+}
+
+
+template<class MatrixType>
+void
+LocalFilter<MatrixType>::
 getLocalRowCopy (local_ordinal_type LocalRow,
                  const Teuchos::ArrayView<local_ordinal_type> &Indices,
                  const Teuchos::ArrayView<scalar_type> &Values,
@@ -677,6 +684,18 @@ getLocalRowCopy (local_ordinal_type LocalRow,
 template<class MatrixType>
 void
 LocalFilter<MatrixType>::
+getLocalRowCopy (local_ordinal_type LocalRow,
+                 const Teuchos::ArrayView<local_ordinal_type> &Indices,
+                 size_t &NumEntries) const
+{
+  Teuchos::Array<scalar_type> Values(Indices.size());
+  getLocalRowCopy(LocalRow, Indices, Values, NumEntries);
+}
+
+
+template<class MatrixType>
+void
+LocalFilter<MatrixType>::
 getGlobalRowView (global_ordinal_type GlobalRow,
                   Teuchos::ArrayView<const global_ordinal_type> &indices,
                   Teuchos::ArrayView<const scalar_type> &values) const
@@ -689,9 +708,32 @@ getGlobalRowView (global_ordinal_type GlobalRow,
 template<class MatrixType>
 void
 LocalFilter<MatrixType>::
+getGlobalRowView (global_ordinal_type GlobalRow,
+                  Teuchos::ArrayView<const global_ordinal_type> &indices) const
+{
+  TEUCHOS_TEST_FOR_EXCEPTION(true, std::runtime_error,
+    "Ifpack2::LocalFilter does not implement getGlobalRowView.");
+}
+
+
+template<class MatrixType>
+void
+LocalFilter<MatrixType>::
 getLocalRowView (local_ordinal_type LocalRow,
                  Teuchos::ArrayView<const local_ordinal_type> &indices,
                  Teuchos::ArrayView<const scalar_type> &values) const
+{
+  TEUCHOS_TEST_FOR_EXCEPTION(true, std::runtime_error,
+    "Ifpack2::LocalFilter does not implement getLocalRowView.");
+}
+
+
+
+template<class MatrixType>
+void
+LocalFilter<MatrixType>::
+getLocalRowView (local_ordinal_type LocalRow,
+                 Teuchos::ArrayView<const local_ordinal_type> &indices) const
 {
   TEUCHOS_TEST_FOR_EXCEPTION(true, std::runtime_error,
     "Ifpack2::LocalFilter does not implement getLocalRowView.");
@@ -730,6 +772,26 @@ rightScale (const Tpetra::Vector<scalar_type, local_ordinal_type, global_ordinal
 {
   TEUCHOS_TEST_FOR_EXCEPTION(true, std::logic_error,
     "Ifpack2::LocalFilter does not implement rightScale.");
+}
+
+
+template<class MatrixType>
+Teuchos::RCP<const typename LocalFilter<MatrixType>::import_type>
+LocalFilter<MatrixType>::
+getImporter () const
+{
+  TEUCHOS_TEST_FOR_EXCEPTION(true, std::logic_error,
+    "Ifpack2::LocalFilter does not implement getImporter.");
+}
+
+
+template<class MatrixType>
+Teuchos::RCP<const typename LocalFilter<MatrixType>::export_type>
+LocalFilter<MatrixType>::
+getExporter () const
+{
+  TEUCHOS_TEST_FOR_EXCEPTION(true, std::logic_error,
+    "Ifpack2::LocalFilter does not implement getExporter.");
 }
 
 

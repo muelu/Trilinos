@@ -75,6 +75,8 @@ createOverlapGraph (const Teuchos::RCP<const GraphType>& inputGraph,
 {
   using Teuchos::RCP;
   using Teuchos::rcp;
+  using Teuchos::rcp_dynamic_cast;
+
   typedef Tpetra::Map<typename GraphType::local_ordinal_type,
                       typename GraphType::global_ordinal_type,
                       typename GraphType::node_type> map_type;
@@ -86,17 +88,26 @@ createOverlapGraph (const Teuchos::RCP<const GraphType>& inputGraph,
     "Ifpack2::createOverlapGraph: overlapLevel must be >= 0, "
     "but you specified overlapLevel = " << overlapLevel << ".");
 
-  const int numProcs = inputGraph->getMap ()->getComm ()->getSize ();
+  const int numProcs = inputGraph->getRowMap ()->getComm ()->getSize ();
   if (overlapLevel == 0 || numProcs < 2) {
     return inputGraph;
   }
+
+  typedef Tpetra::CrsGraph<typename GraphType::local_ordinal_type,
+                           typename GraphType::global_ordinal_type,
+                           typename GraphType::node_type> CrsGraphType;
+
+  RCP<const CrsGraphType> crsInputGraph = rcp_dynamic_cast<const CrsGraphType>(inputGraph);
+  TEUCHOS_TEST_FOR_EXCEPTION(
+    crsInputGraph.is_null(), std::runtime_error,
+    "Ifpack2::createOverlapGraph: For overlap > 0 input graph must be a crs graph");
 
   RCP<const map_type> overlapRowMap = inputGraph->getRowMap ();
   RCP<const map_type> domainMap = inputGraph->getDomainMap ();
   RCP<const map_type> rangeMap = inputGraph->getRangeMap ();
 
-  RCP<GraphType> overlapGraph;
-  RCP<const GraphType> oldGraph;
+  RCP<CrsGraphType> overlapGraph;
+  RCP<const CrsGraphType> oldGraph;
   RCP<const map_type> oldRowMap;
   for (int level = 0; level < overlapLevel; ++level) {
     oldGraph = overlapGraph;
@@ -104,26 +115,26 @@ createOverlapGraph (const Teuchos::RCP<const GraphType>& inputGraph,
 
     RCP<const import_type> overlapImporter;
     if (level == 0) {
-      overlapImporter = inputGraph->getImporter ();
+      overlapImporter = crsInputGraph->getImporter ();
     } else {
       overlapImporter = oldGraph->getImporter ();
     }
 
     overlapRowMap = overlapImporter->getTargetMap ();
     if (level < overlapLevel - 1) {
-      overlapGraph = rcp (new GraphType (overlapRowMap, 0));
+      overlapGraph = rcp (new CrsGraphType (overlapRowMap, 0));
     }
     else {
       // On last iteration, we want to filter out all columns except those that
       // correspond to rows in the graph.  This ensures that our graph is square
-      overlapGraph = rcp (new GraphType (overlapRowMap, overlapRowMap, 0));
+      overlapGraph = rcp (new CrsGraphType (overlapRowMap, overlapRowMap, 0));
     }
 
-    overlapGraph->doImport (*inputGraph, *overlapImporter, Tpetra::INSERT);
+    overlapGraph->doImport (*crsInputGraph, *overlapImporter, Tpetra::INSERT);
     overlapGraph->fillComplete (domainMap, rangeMap);
   }
 
-  return overlapGraph;
+  return rcp_dynamic_cast<GraphType>(overlapGraph);
 }
 
 /// \brief Construct an overlapped matrix for use with Ifpack2 preconditioners.

@@ -243,10 +243,13 @@ void RBILUK<MatrixType>::initialize ()
     typedef Tpetra::CrsGraph<local_ordinal_type,
                              global_ordinal_type,
                              node_type> crs_graph_type;
+    typedef Tpetra::RowGraph<local_ordinal_type,
+                             global_ordinal_type,
+                             node_type> row_graph_type;
 
-    RCP<const crs_graph_type> matrixCrsGraph = Teuchos::rcpFromRef(A_block_->getCrsGraph() );
-    this->Graph_ = rcp (new Ifpack2::IlukGraph<crs_graph_type> (matrixCrsGraph,
-        this->LevelOfFill_, 0));
+    RCP<const row_graph_type> matrixCrsGraph = Teuchos::rcpFromRef(A_block_->getCrsGraph() );
+    this->Graph_ = rcp (new Ifpack2::IlukGraph<row_graph_type> (
+                            matrixCrsGraph, this->LevelOfFill_, 0));
 
     this->Graph_->initialize ();
     allocate_L_and_U_blocks ();

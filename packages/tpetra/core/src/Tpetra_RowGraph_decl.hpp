@@ -50,6 +50,7 @@
 #include "Tpetra_Import.hpp"
 #include "Tpetra_Export.hpp"
 #include "Tpetra_Packable.hpp"
+#include "Tpetra_SrcDistObject.hpp"
 
 
 namespace Tpetra {
@@ -71,6 +72,7 @@ namespace Tpetra {
             class Node = ::Tpetra::Details::DefaultTypes::node_type>
   class RowGraph :
     virtual public Teuchos::Describable,
+    virtual public SrcDistObject,
     public Packable<GlobalOrdinal, LocalOrdinal> {
   public:
     //! \name Typedefs
@@ -81,6 +83,13 @@ namespace Tpetra {
     typedef GlobalOrdinal global_ordinal_type;
     //! The Kokkos Node type.
     typedef Node          node_type;
+    //! The Map specialization used by this class.
+    typedef Tpetra::Map<LocalOrdinal, GlobalOrdinal, Node> map_type;
+    //! The Import specialization used by this class.
+    typedef Tpetra::Import<LocalOrdinal, GlobalOrdinal, Node> import_type;
+    //! The Export specialization used by this class.
+    typedef Tpetra::Export<LocalOrdinal, GlobalOrdinal, Node> export_type;
+
     //@}
 
     //! Destructor (virtual for memory safety of derived classes).

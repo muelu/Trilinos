@@ -78,7 +78,7 @@ namespace Details {
     // here.  However, we still would have to do LID->GID lookups to
     // make sure that we are using the correct diagonal column
     // indices, so it probably wouldn't help much.
-    Teuchos::RCP<graph_type> diagonalGraph;
+    Teuchos::RCP<crs_graph_type> diagonalGraph;
     diagonalGraph = Teuchos::rcp(new crs_graph_type(graph.getRowMap(), maxDiagEntPerRow, Tpetra::StaticProfile));
     const map_type& meshRowMap = *(graph.getRowMap());
 

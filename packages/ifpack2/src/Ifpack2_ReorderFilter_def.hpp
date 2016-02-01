@@ -152,12 +152,10 @@ ReorderFilter<MatrixType>::getRangeMap() const
 
 
 template<class MatrixType>
-Teuchos::RCP<const Tpetra::RowGraph<typename MatrixType::local_ordinal_type,
-                                    typename MatrixType::global_ordinal_type,
-                                    typename MatrixType::node_type> >
+Teuchos::RCP<const typename ReorderFilter<MatrixType>::row_graph_type>
 ReorderFilter<MatrixType>::getGraph() const
 {
-  throw std::runtime_error("Ifpack2::ReorderFilter: does not support getGraph.");
+  return Teuchos::rcp(dynamic_cast<const row_graph_type*>(this), false);
 }
 
 
@@ -367,6 +365,17 @@ getGlobalRowCopy (global_ordinal_type globalRow,
 
 template<class MatrixType>
 void ReorderFilter<MatrixType>::
+getGlobalRowCopy (global_ordinal_type globalRow,
+                  const Teuchos::ArrayView<global_ordinal_type>& globalInd,
+                  size_t& numEntries) const
+{
+  Teuchos::Array<scalar_type> globalVal(globalInd.size());
+  getGlobalRowCopy(globalRow, globalInd, globalVal, numEntries);
+}
+
+
+template<class MatrixType>
+void ReorderFilter<MatrixType>::
 getLocalRowCopy (local_ordinal_type LocalRow,
                  const Teuchos::ArrayView<local_ordinal_type> &Indices,
                  const Teuchos::ArrayView<scalar_type> &Values,
@@ -407,9 +416,28 @@ getLocalRowCopy (local_ordinal_type LocalRow,
 
 template<class MatrixType>
 void ReorderFilter<MatrixType>::
+getLocalRowCopy (local_ordinal_type LocalRow,
+                 const Teuchos::ArrayView<local_ordinal_type> &Indices,
+                 size_t &NumEntries) const
+{
+  Teuchos::Array<scalar_type> Values(Indices.size());
+  getLocalRowCopy(LocalRow, Indices, Values, NumEntries);
+}
+
+
+template<class MatrixType>
+void ReorderFilter<MatrixType>::
 getGlobalRowView (global_ordinal_type GlobalRow,
                   Teuchos::ArrayView<const global_ordinal_type> &indices,
                   Teuchos::ArrayView<const scalar_type> &values) const
+{
+  throw std::runtime_error("Ifpack2::ReorderFilter: does not support getGlobalRowView.");
+}
+
+template<class MatrixType>
+void ReorderFilter<MatrixType>::
+getGlobalRowView (global_ordinal_type GlobalRow,
+                  Teuchos::ArrayView<const global_ordinal_type> &indices) const
 {
   throw std::runtime_error("Ifpack2::ReorderFilter: does not support getGlobalRowView.");
 }
@@ -420,6 +448,15 @@ void ReorderFilter<MatrixType>::
 getLocalRowView (local_ordinal_type LocalRow,
                  Teuchos::ArrayView<const local_ordinal_type> &indices,
                  Teuchos::ArrayView<const scalar_type> &values) const
+{
+  throw std::runtime_error("Ifpack2::ReorderFilter: does not support getLocalRowView.");
+}
+
+
+template<class MatrixType>
+void ReorderFilter<MatrixType>::
+getLocalRowView (local_ordinal_type LocalRow,
+                 Teuchos::ArrayView<const local_ordinal_type> &indices) const
 {
   throw std::runtime_error("Ifpack2::ReorderFilter: does not support getLocalRowView.");
 }
@@ -445,6 +482,26 @@ template<class MatrixType>
 void ReorderFilter<MatrixType>::rightScale(const Tpetra::Vector<scalar_type, local_ordinal_type, global_ordinal_type, node_type>& x)
 {
   throw std::runtime_error("Ifpack2::ReorderFilter does not support rightScale.");
+}
+
+
+template<class MatrixType>
+Teuchos::RCP<const typename ReorderFilter<MatrixType>::import_type>
+ReorderFilter<MatrixType>::
+getImporter () const
+{
+  TEUCHOS_TEST_FOR_EXCEPTION(true, std::logic_error,
+    "Ifpack2::ReorderFilter does not implement getImporter.");
+}
+
+
+template<class MatrixType>
+Teuchos::RCP<const typename ReorderFilter<MatrixType>::export_type>
+ReorderFilter<MatrixType>::
+getExporter () const
+{
+  TEUCHOS_TEST_FOR_EXCEPTION(true, std::logic_error,
+    "Ifpack2::ReorderFilter does not implement getExporter.");
 }
 
 

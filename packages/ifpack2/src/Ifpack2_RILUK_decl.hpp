@@ -283,6 +283,9 @@ class RILUK:
                             global_ordinal_type,
                             node_type> row_matrix_type;
 
+  typedef Tpetra::RowGraph<local_ordinal_type,
+                           global_ordinal_type,
+                           node_type> row_graph_type;
 
   static_assert(std::is_same<MatrixType, row_matrix_type>::value, "Ifpack2::RILUK: The template parameter MatrixType must be a Tpetra::RowMatrix specialization.  Please don't use Tpetra::CrsMatrix (a subclass of Tpetra::RowMatrix) here anymore.");
 
@@ -298,15 +301,6 @@ class RILUK:
   ///
   /// \param A_in [in] The input matrix.
   RILUK (const Teuchos::RCP<const row_matrix_type>& A_in);
-
-  /// \brief Constructor that takes a Tpetra::CrsMatrix.
-  ///
-  /// This constructor exists to avoid "ambiguous constructor"
-  /// warnings.  It does the same thing as the constructor that takes
-  /// a Tpetra::RowMatrix.
-  ///
-  /// \param A_in [in] The input matrix.
-  RILUK (const Teuchos::RCP<const crs_matrix_type>& A_in);
 
  private:
   /// \brief Copy constructor: declared private but not defined, so
@@ -526,7 +520,7 @@ public:
   }
 
   //! Return the Ifpack2::IlukGraph associated with this factored matrix.
-  Teuchos::RCP<Ifpack2::IlukGraph<Tpetra::CrsGraph<local_ordinal_type,global_ordinal_type,node_type> > > getGraph () const {
+  Teuchos::RCP<Ifpack2::IlukGraph<row_graph_type> > getGraph () const {
     return Graph_;
   }
 
@@ -566,18 +560,11 @@ protected:
   Teuchos::RCP<const row_matrix_type> A_;
 
   //! The ILU(k) graph.
-  Teuchos::RCP<Ifpack2::IlukGraph<Tpetra::CrsGraph<local_ordinal_type,
-                                                   global_ordinal_type,
-                                                   node_type> > > Graph_;
+  Teuchos::RCP<Ifpack2::IlukGraph<row_graph_type> > Graph_;
   /// \brief The matrix used to to compute ILU(k).
   ///
-  /// If A_local (the local filter of the original input matrix) is a
-  /// Tpetra::CrsMatrix, then this is just A_local.  Otherwise, this
-  /// class reserves the right for A_local_crs_ to be a copy of
-  /// A_local.  This is because the current implementation of ILU(k)
-  /// only knows how to factor a Tpetra::CrsMatrix.  That may change
-  /// in the future.
-  Teuchos::RCP<const crs_matrix_type> A_local_crs_;
+  /// Local filter of the original input matrix.
+  Teuchos::RCP<const row_matrix_type> A_local_;
 
   //! The L (lower triangular) factor of ILU(k).
   Teuchos::RCP<crs_matrix_type> L_;
