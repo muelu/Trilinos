@@ -507,6 +507,13 @@ getExporter () const
 
 template<class MatrixType>
 void ReorderFilter<MatrixType>::
+resetMatrix(const Teuchos::RCP<const row_matrix_type>& A) {
+  A_ = A;
+}
+
+
+template<class MatrixType>
+void ReorderFilter<MatrixType>::
 apply (const Tpetra::MultiVector<scalar_type,local_ordinal_type,global_ordinal_type,node_type> &X,
        Tpetra::MultiVector<scalar_type,local_ordinal_type,global_ordinal_type,node_type> &Y,
        Teuchos::ETransp mode,

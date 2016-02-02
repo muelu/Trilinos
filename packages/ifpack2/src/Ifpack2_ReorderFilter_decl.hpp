@@ -421,6 +421,8 @@ public:
   //! Whether apply() can apply the transpose or conjugate transpose.
   virtual bool hasTransposeApply() const;
 
+  void resetMatrix(const Teuchos::RCP<const row_matrix_type>& A);
+
   //! Permute multivector: original-to-reordered
   virtual void permuteOriginalToReordered(const Tpetra::MultiVector<scalar_type,local_ordinal_type,global_ordinal_type,node_type> &originalX,
                                           Tpetra::MultiVector<scalar_type,local_ordinal_type,global_ordinal_type,node_type> &reorderedY) const;
