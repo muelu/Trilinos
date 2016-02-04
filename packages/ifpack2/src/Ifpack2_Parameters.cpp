@@ -127,6 +127,8 @@ void getValidParameters(Teuchos::ParameterList& params)
   params.set("schwarz: use reordering", true);
   params.set("schwarz: filter singletons", false);
   params.set("schwarz: overlap level", (int)0);
+  params.set("schwarz: reordering list", empty);
+  params.set("subdomain solver name", "RILUK");
 
   // Ifpack2_BlockRelaxation.hpp
   // params.set("relaxation: type", "Jacobi"); // already set
