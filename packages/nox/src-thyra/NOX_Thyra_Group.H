@@ -304,6 +304,9 @@ namespace NOX {
 
       Teuchos::RCP< const ::Thyra::ModelEvaluator<double> > getModel() const;
 
+      std::string getReusePolicy() const;
+      void        setReusePolicy(const std::string& reusePolicy);
+
     protected:
 
       //! resets the isValid flags to false
@@ -376,6 +379,8 @@ namespace NOX {
 
       //! Preconditioner for Jacobian
       Teuchos::RCP< ::Thyra::PreconditionerBase<double> > prec_;
+
+      std::string reusePolicy_;
 
       //! Preconditioner factory
       Teuchos::RCP< ::Thyra::PreconditionerFactoryBase<double> > prec_factory_;
