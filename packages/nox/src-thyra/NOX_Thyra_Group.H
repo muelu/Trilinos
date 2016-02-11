@@ -92,7 +92,6 @@ namespace NOX {
         requires significant changes to the Group object.
     */
     class Group : public virtual NOX::Abstract::Group {
-
     public:
 
       /** \brief The default constructor that uses the linear solver from the ModelEvaluator.
@@ -105,8 +104,8 @@ namespace NOX {
           constructor should be used.
 
           \param[in] initial_guess Initial guess for the solution vector
-      \param[in] model ModelEvaluator
-      \param[in] weight_vector Optional diagonal weighting vector for the model.
+          \param[in] model ModelEvaluator
+          \param[in] weight_vector Optional diagonal weighting vector for the model.
       */
       Group(const NOX::Thyra::Vector& initial_guess,
         const Teuchos::RCP<const ::Thyra::ModelEvaluator<double> >& model,
@@ -122,12 +121,12 @@ namespace NOX {
           NOX::Thyra::MatrixFreeJacobianOperator).
 
           \param[in] initial_guess (Required) Initial guess for the solution vector
-      \param[in] model (Required) ModelEvaluator
-      \param[in] linear_op (Optional) Forward operator for the Jacobian.  Must be non-null for Newton-based solvers.
-      \param[in] lows_factory (Optional) Factory for building and updating linear solver.
-      \param[in] prec_op (Optional) Preconditioner operator.  If set to Teuchos::null and a non-null prec_factory exists, the prec_op will be constructed using the preconditioner factory.
-      \param[in] prec_factory (Optional) Factory for updating the precondiitoner.  If set to Teuchos::null and there is a non-null prec_op, then the preconditioner will be updated using the model evaluator as long as the ModelEvaluator::outArgs supports W_prec.
-      \param[in] weight_vector (Optional) diagonal weighting vector for the model.
+          \param[in] model (Required) ModelEvaluator
+          \param[in] linear_op (Optional) Forward operator for the Jacobian.  Must be non-null for Newton-based solvers.
+          \param[in] lows_factory (Optional) Factory for building and updating linear solver.
+          \param[in] prec_op (Optional) Preconditioner operator.  If set to Teuchos::null and a non-null prec_factory exists, the prec_op will be constructed using the preconditioner factory.
+          \param[in] prec_factory (Optional) Factory for updating the precondiitoner. If set to Teuchos::null and there is a non-null prec_op, then the preconditioner will be updated using the model evaluator as long as the ModelEvaluator::outArgs supports W_prec.
+          \param[in] weight_vector (Optional) diagonal weighting vector for the model.
       */
       Group(const NOX::Thyra::Vector& initial_guess,
         const Teuchos::RCP<const ::Thyra::ModelEvaluator<double> >& model,

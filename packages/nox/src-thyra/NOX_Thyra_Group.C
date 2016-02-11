@@ -100,7 +100,7 @@ Group(const NOX::Thyra::Vector& initial_guess,
 
   lop_ = model->create_W_op();
 
-  // create jacobian operator
+  // Create jacobian operator
   lows_factory_ = model->get_W_factory();
 
   TEUCHOS_ASSERT(nonnull(lows_factory_));
@@ -110,14 +110,14 @@ Group(const NOX::Thyra::Vector& initial_guess,
 
   losb_ = Teuchos::rcp(new ::Thyra::DefaultLinearOpSource<double>(lop_));
 
-  // create preconditioner
+  // Create preconditioner
   prec_factory_ = lows_factory_->getPreconditionerFactory();
 
   // Create in/out args
-  in_args_ = model_->createInArgs();
+  in_args_  = model_->createInArgs();
   out_args_ = model_->createOutArgs();
 
-  if (Teuchos::nonnull(prec_factory_)) {
+  if (nonnull(prec_factory_)) {
     prec_ = prec_factory_->createPrec();
   } else if (out_args_.supports( ::Thyra::ModelEvaluatorBase::OUT_ARG_W_prec)) {
     prec_ = model->create_W_prec();
@@ -127,9 +127,9 @@ Group(const NOX::Thyra::Vector& initial_guess,
 }
 
 NOX::Thyra::Group::
-Group(const NOX::Thyra::Vector& initial_guess,
-      const Teuchos::RCP< const ::Thyra::ModelEvaluator<double> >& model,
-      const Teuchos::RCP< ::Thyra::LinearOpBase<double> >& linear_op,
+Group(const NOX::Thyra::Vector&                                                 initial_guess,
+      const Teuchos::RCP<const ::Thyra::ModelEvaluator<double> >&               model,
+      const Teuchos::RCP< ::Thyra::LinearOpBase<double> >&                      linear_op,
       const Teuchos::RCP<const ::Thyra::LinearOpWithSolveFactoryBase<double> >& lows_factory,
       const Teuchos::RCP< ::Thyra::PreconditionerBase<double> >& prec_op,
       const Teuchos::RCP< ::Thyra::PreconditionerFactoryBase<double> >& prec_factory,
@@ -165,16 +165,16 @@ Group(const NOX::Thyra::Vector& initial_guess,
 
   // Create jacobian with solver
   if (nonnull(lop_) && nonnull(lows_factory_)) {
-    newton_vec_ = Teuchos::rcp(new NOX::Thyra::Vector(*x_vec_, ShapeCopy));
+    newton_vec_      = Teuchos::rcp(new NOX::Thyra::Vector(*x_vec_, ShapeCopy));
     shared_jacobian_ = Teuchos::rcp(new NOX::SharedObject< ::Thyra::LinearOpWithSolveBase<double>, NOX::Thyra::Group >(lows_factory_->createOp()));
     losb_ = Teuchos::rcp(new ::Thyra::DefaultLinearOpSource<double>(lop_));
   }
 
-  if ( nonnull(prec_factory_) && is_null(prec_) )
+  if (nonnull(prec_factory_) && is_null(prec_) )
     prec_ = prec_factory_->createPrec();
 
   // Create in/out args
-  in_args_ = model_->createInArgs();
+  in_args_  = model_->createInArgs();
   out_args_ = model_->createOutArgs();
 
   resetIsValidFlags();
@@ -191,12 +191,11 @@ NOX::Thyra::Group::Group(const NOX::Thyra::Group& source, NOX::CopyType type) :
   right_weight_vec_(source.right_weight_vec_),
   inv_right_weight_vec_(source.inv_right_weight_vec_)
 {
-
-  x_vec_ = Teuchos::rcp(new NOX::Thyra::Vector(*source.x_vec_, type));
-  f_vec_ = Teuchos::rcp(new NOX::Thyra::Vector(*source.f_vec_, type));
-  if (nonnull(source.newton_vec_))
-  newton_vec_ = Teuchos::rcp(new NOX::Thyra::Vector(*source.newton_vec_, type));
+  x_vec_        = Teuchos::rcp(new NOX::Thyra::Vector(*source.x_vec_,        type));
+  f_vec_        = Teuchos::rcp(new NOX::Thyra::Vector(*source.f_vec_,        type));
   gradient_vec_ = Teuchos::rcp(new NOX::Thyra::Vector(*source.gradient_vec_, type));
+  if (nonnull(source.newton_vec_))
+    newton_vec_ = Teuchos::rcp(new NOX::Thyra::Vector(*source.newton_vec_,   type));
 
   if (nonnull(source.weight_vec_))
     weight_vec_ = source.weight_vec_;
@@ -208,23 +207,23 @@ NOX::Thyra::Group::Group(const NOX::Thyra::Group& source, NOX::CopyType type) :
   out_args_ = model_->createOutArgs();
 
   if (type == NOX::DeepCopy) {
-    is_valid_f_ = source.is_valid_f_;
-    is_valid_jacobian_ = source.is_valid_jacobian_;
-    is_valid_newton_dir_ = source.is_valid_newton_dir_;
+    is_valid_f_            = source.is_valid_f_;
+    is_valid_jacobian_     = source.is_valid_jacobian_;
+    is_valid_newton_dir_   = source.is_valid_newton_dir_;
     is_valid_gradient_dir_ = source.is_valid_gradient_dir_;
-    is_valid_lows_ = source.is_valid_lows_;
+    is_valid_lows_         = source.is_valid_lows_;
 
     // New copy takes ownership of the shared Jacobian for DeepCopy
     if (nonnull(shared_jacobian_))
       if (this->isJacobian())
-    shared_jacobian_->getObject(this);
+        shared_jacobian_->getObject(this);
   }
   else if (type == NOX::ShapeCopy) {
     resetIsValidFlags();
   }
   else {
     TEUCHOS_TEST_FOR_EXCEPTION(true, std::logic_error,
-               "NOX Error - Copy type is invalid!");
+                               "NOX Error - Copy type is invalid!");
   }
 }
 
@@ -233,18 +232,17 @@ NOX::Thyra::Group::~Group()
 
 void NOX::Thyra::Group::resetIsValidFlags()
 {
-  is_valid_f_ = false;
-  is_valid_jacobian_ = false;
-  is_valid_newton_dir_ = false;
+  is_valid_f_            = false;
+  is_valid_jacobian_     = false;
+  is_valid_newton_dir_   = false;
   is_valid_gradient_dir_ = false;
-  is_valid_lows_ = false;
+  is_valid_lows_         = false;
 }
 
 Teuchos::RCP<NOX::Abstract::Group> NOX::Thyra::Group::
 clone(NOX::CopyType type) const
 {
-  Teuchos::RCP<NOX::Abstract::Group> newgrp =
-    Teuchos::rcp(new NOX::Thyra::Group(*this, type));
+  Teuchos::RCP<NOX::Abstract::Group> newgrp = Teuchos::rcp(new NOX::Thyra::Group(*this, type));
   return newgrp;
 }
 
@@ -255,26 +253,25 @@ NOX::Abstract::Group& NOX::Thyra::Group::operator=(const NOX::Abstract::Group& s
 
 NOX::Abstract::Group& NOX::Thyra::Group::operator=(const Group& source)
 {
-
   // Copy the xVector
   *x_vec_ = *source.x_vec_;
 
-  is_valid_f_ = source.is_valid_f_;
-  is_valid_jacobian_ = source.is_valid_jacobian_;
-  is_valid_newton_dir_ = source.is_valid_newton_dir_;
+  is_valid_f_            = source.is_valid_f_;
+  is_valid_jacobian_     = source.is_valid_jacobian_;
+  is_valid_newton_dir_   = source.is_valid_newton_dir_;
   is_valid_gradient_dir_ = source.is_valid_gradient_dir_;
-  is_valid_lows_ = source.is_valid_lows_;
+  is_valid_lows_         = source.is_valid_lows_;
 
   if (this->isF())
     *f_vec_ = *(source.f_vec_);
 
   // Jacobian is shared, always assign shared object
   shared_jacobian_ = source.shared_jacobian_;
-  lows_factory_ = source.lows_factory_;
-  lop_ = source.lop_;
-  losb_ = source.losb_;
-  prec_factory_ = source.prec_factory_;
-  prec_ = source.prec_;
+  lows_factory_    = source.lows_factory_;
+  lop_             = source.lop_;
+  losb_            = source.losb_;
+  prec_factory_    = source.prec_factory_;
+  prec_            = source.prec_;
 
   if (this->isNewton())
     *newton_vec_ = *(source.newton_vec_);
@@ -404,11 +401,11 @@ NOX::Abstract::Group::ReturnType NOX::Thyra::Group::computeF()
   if (this->isF())
     return NOX::Abstract::Group::Ok;
 
-  in_args_.set_x(x_vec_->getThyraRCPVector().assert_not_null());
+  in_args_ .set_x(x_vec_->getThyraRCPVector().assert_not_null());
   out_args_.set_f(f_vec_->getThyraRCPVector().assert_not_null());
   //model_->setVerbLevel(Teuchos::VERB_EXTREME);
   model_->evalModel(in_args_, out_args_);
-  in_args_.set_x(Teuchos::null);
+  in_args_ .set_x(Teuchos::null);
   out_args_.set_f(Teuchos::null);
 
   is_valid_f_ = true;
@@ -429,10 +426,10 @@ NOX::Abstract::Group::ReturnType NOX::Thyra::Group::computeJacobian()
 
   shared_jacobian_->getObject(this);
 
-  in_args_.set_x(x_vec_->getThyraRCPVector());
+  in_args_ .set_x   (x_vec_->getThyraRCPVector());
   out_args_.set_W_op(lop_);
   model_->evalModel(in_args_, out_args_);
-  in_args_.set_x(Teuchos::null);
+  in_args_ .set_x   (Teuchos::null);
   out_args_.set_W_op(Teuchos::null);
 
   is_valid_jacobian_ = true;
@@ -467,7 +464,7 @@ computeNewton(Teuchos::ParameterList& p)
 
 NOX::Abstract::Group::ReturnType
 NOX::Thyra::Group::applyJacobian(const Abstract::Vector& input,
-                 NOX::Abstract::Vector& result) const
+                                 NOX::Abstract::Vector& result) const
 {
   using Teuchos::dyn_cast;
   return applyJacobian(dyn_cast<const NOX::Thyra::Vector>(input),
@@ -702,8 +699,8 @@ void NOX::Thyra::Group::print() const
 // protected
 NOX::Abstract::Group::ReturnType NOX::Thyra::Group::
 applyJacobianInverseMultiVector(Teuchos::ParameterList& p,
-                const ::Thyra::MultiVectorBase<double>& input,
-                ::Thyra::MultiVectorBase<double>& result) const
+                                const ::Thyra::MultiVectorBase<double>& input,
+                                ::Thyra::MultiVectorBase<double>& result) const
 {
   this->updateLOWS();
 
@@ -756,10 +753,11 @@ applyJacobianInverseMultiVector(Teuchos::ParameterList& p,
 }
 
 NOX::Abstract::Group::ReturnType
-NOX::Thyra::Group::applyRightPreconditioning(bool useTranspose,
-                         Teuchos::ParameterList& params,
-                         const NOX::Abstract::Vector& input,
-                         NOX::Abstract::Vector& result) const
+NOX::Thyra::Group::applyRightPreconditioning(
+    bool                            useTranspose,
+    Teuchos::ParameterList&         params,
+    const NOX::Abstract::Vector&    input,
+    NOX::Abstract::Vector&          result) const
 {
   NOX_ASSERT(nonnull(prec_));
 
@@ -780,15 +778,15 @@ NOX::Thyra::Group::applyRightPreconditioning(bool useTranspose,
     prec_factory_->initializePrec(losb_, prec_.get());
   }
   else if (out_args_.supports( ::Thyra::ModelEvaluatorBase::OUT_ARG_W_prec)) {
-    in_args_.set_x(x_vec_->getThyraRCPVector().assert_not_null());
+    in_args_ .set_x     (x_vec_->getThyraRCPVector().assert_not_null());
     out_args_.set_W_prec(prec_);
     model_->evalModel(in_args_, out_args_);
-    in_args_.set_x(Teuchos::null);
+    in_args_ .set_x     (Teuchos::null);
     out_args_.set_W_prec(Teuchos::null);
   }
 
-  const NOX::Thyra::Vector & inputThyraVector = dynamic_cast<const NOX::Thyra::Vector&>(input);
-  NOX::Thyra::Vector & resultThyraVector = dynamic_cast<NOX::Thyra::Vector&>(result);
+  const NOX::Thyra::Vector& inputThyraVector  = dynamic_cast<const NOX::Thyra::Vector&>(input);
+  NOX::Thyra::Vector&       resultThyraVector = dynamic_cast<NOX::Thyra::Vector&>(result);
 
   // Could be left, right or unspecified
   Teuchos::RCP<const ::Thyra::LinearOpBase<double> > tmp_prec_ = prec_->getRightPrecOp();
@@ -797,9 +795,9 @@ NOX::Thyra::Group::applyRightPreconditioning(bool useTranspose,
   NOX_ASSERT(nonnull(tmp_prec_));
 
   ::Thyra::apply(*tmp_prec_,
-         ::Thyra::NOTRANS,
-         *inputThyraVector.getThyraRCPVector(),
-         outArg(*resultThyraVector.getThyraRCPVector().ptr()));
+                 ::Thyra::NOTRANS,
+                 *inputThyraVector.getThyraRCPVector(),
+                 outArg(*resultThyraVector.getThyraRCPVector().ptr()));
 
   if (nonnull(prec_factory_))
     this->unscaleResidualAndJacobian();
@@ -840,19 +838,35 @@ void NOX::Thyra::Group::updateLOWS() const
   {
     NOX_FUNC_TIME_MONITOR("NOX Total Preconditioner Construction");
 
+    std::string reusePolicy = "PRPT_RECOMPUTE";
     if (nonnull(prec_factory_)) {
-      prec_factory_->initializePrec(losb_, prec_.get());
+      std::cout << "reusePolicy = " << reusePolicy << std::endl;
+      if (reusePolicy == "PRPT_REBUILD") {
+        // Rebuild preconditioner from scratch
+        prec_factory_->uninitializePrec(prec_.get());
+        prec_factory_->initializePrec  (losb_, prec_.get());
 
+      } else if (reusePolicy == "PRPT_RECOMPUTE") {
+        // Reuse previously constructed preconditioner
+        prec_factory_->initializePrec(losb_, prec_.get());
+
+      } else if (reusePolicy == "PRPT_REUSE") {
+        // Do nothing (unless preconditioner was not built before)
+        if (!nonnull(prec_))
+          prec_factory_->initializePrec(losb_, prec_.get());
+      }
+
+      // Register newly constructed preconditioner
       ::Thyra::initializePreconditionedOp<double>(*lows_factory_,
                           lop_,
                           prec_,
                           shared_jacobian_->getObject(this).ptr());
     }
     else if ( nonnull(prec_) && (out_args_.supports( ::Thyra::ModelEvaluatorBase::OUT_ARG_W_prec)) ) {
-      in_args_.set_x(x_vec_->getThyraRCPVector().assert_not_null());
+      in_args_ .set_x     (x_vec_->getThyraRCPVector().assert_not_null());
       out_args_.set_W_prec(prec_);
       model_->evalModel(in_args_, out_args_);
-      in_args_.set_x(Teuchos::null);
+      in_args_ .set_x     (Teuchos::null);
       out_args_.set_W_prec(Teuchos::null);
 
       ::Thyra::initializePreconditionedOp<double>(*lows_factory_,
