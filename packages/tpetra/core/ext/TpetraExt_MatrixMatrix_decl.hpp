@@ -329,6 +329,12 @@ void import_and_extract_views(
   bool userAssertsThereAreNoRemotes=false,
   const std::string & label = std::string());
 
+template<class LocalOrdinal,
+         class GlobalOrdinal,
+         class Node>
+bool is_submap(const Map<LocalOrdinal,GlobalOrdinal,Node>& map1,
+               const Map<LocalOrdinal,GlobalOrdinal,Node>& map2);
+
 template<class Scalar,
          class LocalOrdinal,
          class GlobalOrdinal,

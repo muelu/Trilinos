@@ -2222,6 +2222,28 @@ void import_and_extract_views(
   }
 }
 
+template<class LocalOrdinal,
+         class GlobalOrdinal,
+         class Node>
+bool is_submap(const Map<LocalOrdinal,GlobalOrdinal,Node>& map1,
+               const Map<LocalOrdinal,GlobalOrdinal,Node>& map2) {
+  Teuchos::ArrayView<const GlobalOrdinal> rowElements = map1.getNodeElementList();
+  Teuchos::ArrayView<const GlobalOrdinal> colElements = map2.getNodeElementList();
+
+  const size_t numElements = map1.size(), numElements2 = map2.size();
+  if (numElements > numElements2)
+    return false;
+
+  bool isSubMap = true;
+  for (size_t i = 0; i < numElements; i++)
+    if (map1[i] != map2[i]) {
+      isSubMap = false;
+      break;
+    }
+
+  return isSubMap;
+}
+
 
 
 } //End namepsace MMdetails
