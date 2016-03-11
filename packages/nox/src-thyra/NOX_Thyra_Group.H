@@ -304,8 +304,8 @@ namespace NOX {
 
       Teuchos::RCP< const ::Thyra::ModelEvaluator<double> > getModel() const;
 
-      std::string getReusePolicy() const;
-      void        setReusePolicy(const std::string& reusePolicy);
+      static std::string getReusePolicy();
+      static void        setReusePolicy(const std::string& reusePolicy);
 
     protected:
 
@@ -380,7 +380,7 @@ namespace NOX {
       //! Preconditioner for Jacobian
       Teuchos::RCP< ::Thyra::PreconditionerBase<double> > prec_;
 
-      std::string reusePolicy_;
+      static std::string reusePolicyGlobal_;
 
       //! Preconditioner factory
       Teuchos::RCP< ::Thyra::PreconditionerFactoryBase<double> > prec_factory_;

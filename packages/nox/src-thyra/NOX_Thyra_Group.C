@@ -124,8 +124,6 @@ Group(const NOX::Thyra::Vector& initial_guess,
   }
 
   resetIsValidFlags();
-
-  reusePolicy_ = "PRPT_RECOMPUTE";
 }
 
 NOX::Thyra::Group::
@@ -180,8 +178,6 @@ Group(const NOX::Thyra::Vector&                                                 
   out_args_ = model_->createOutArgs();
 
   resetIsValidFlags();
-
-  reusePolicy_ = "PRPT_RECOMPUTE";
 }
 
 NOX::Thyra::Group::Group(const NOX::Thyra::Group& source, NOX::CopyType type) :
@@ -229,8 +225,6 @@ NOX::Thyra::Group::Group(const NOX::Thyra::Group& source, NOX::CopyType type) :
     TEUCHOS_TEST_FOR_EXCEPTION(true, std::logic_error,
                                "NOX Error - Copy type is invalid!");
   }
-
-  reusePolicy_ = source.reusePolicy_;
 }
 
 NOX::Thyra::Group::~Group()
@@ -831,15 +825,18 @@ NOX::Thyra::Group::getThyraNormType(const std::string& name) const
   }
 }
 
-std::string NOX::Thyra::Group::getReusePolicy() const {
-  return reusePolicy_;
+std::string NOX::Thyra::Group::reusePolicyGlobal_ = "PRPT_RECOMPUTE";
+
+std::string NOX::Thyra::Group::getReusePolicy() {
+  return reusePolicyGlobal_;
 }
 
 void NOX::Thyra::Group::setReusePolicy(const std::string& reusePolicy) {
   TEUCHOS_TEST_FOR_EXCEPTION(reusePolicy != "PRPT_REBUILD" && reusePolicy != "PRPT_RECOMPUTE" && reusePolicy != "PRPT_REUSE",
     std::logic_error, "Unknown reuse policy \"" << reusePolicy << "\"");
-  reusePolicy_ = reusePolicy;
+  reusePolicyGlobal_ = reusePolicy;
 }
+
 
 void NOX::Thyra::Group::updateLOWS() const
 {
@@ -855,16 +852,16 @@ void NOX::Thyra::Group::updateLOWS() const
     NOX_FUNC_TIME_MONITOR("NOX Total Preconditioner Construction");
 
     if (nonnull(prec_factory_)) {
-      if (reusePolicy_ == "PRPT_REBUILD") {
+      if (getReusePolicy() == "PRPT_REBUILD") {
         // Rebuild preconditioner from scratch
         prec_factory_->uninitializePrec(prec_.get());
         prec_factory_->initializePrec  (losb_, prec_.get());
 
-      } else if (reusePolicy_ == "PRPT_RECOMPUTE") {
+      } else if (getReusePolicy() == "PRPT_RECOMPUTE") {
         // Reuse previously constructed preconditioner
         prec_factory_->initializePrec(losb_, prec_.get());
 
-      } else if (reusePolicy_ == "PRPT_REUSE") {
+      } else if (getReusePolicy() == "PRPT_REUSE") {
         // Do nothing (unless preconditioner was not built before)
         if (!nonnull(prec_))
           prec_factory_->initializePrec(losb_, prec_.get());

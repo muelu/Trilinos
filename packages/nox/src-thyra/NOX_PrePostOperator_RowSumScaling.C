@@ -72,13 +72,7 @@ runPreIterate(const NOX::Solver::Generic& solver)
     computeScaling(solver);
 
   if (solver.getNumIterations()) {
-    using Teuchos::RCP;
-    using Teuchos::rcp_dynamic_cast;
-    using Teuchos::rcp_const_cast;
-    RCP<const NOX::Abstract::Group> group = solver.getSolutionGroupPtr();
-    RCP<const NOX::Thyra::Group> thyra_group =
-        rcp_dynamic_cast<const NOX::Thyra::Group>(group);
-    rcp_const_cast<NOX::Thyra::Group>(thyra_group)->setReusePolicy("PRPT_RECOMPUTE");
+    NOX::Thyra::Group::setReusePolicy("PRPT_RECOMPUTE");
   }
 }
 
@@ -91,13 +85,7 @@ runPreSolve(const NOX::Solver::Generic& solver)
   TEUCHOS_TEST_FOR_EXCEPTION(solver.getNumIterations(), std::logic_error,
     "Shouldn't the number of iterations always be 0 in the beginning");
 
-  using Teuchos::RCP;
-  using Teuchos::rcp_dynamic_cast;
-  using Teuchos::rcp_const_cast;
-  RCP<const NOX::Abstract::Group> group = solver.getSolutionGroupPtr();
-  RCP<const NOX::Thyra::Group> thyra_group =
-    rcp_dynamic_cast<const NOX::Thyra::Group>(group);
-  rcp_const_cast<NOX::Thyra::Group>(thyra_group)->setReusePolicy("PRPT_REBUILD");
+  NOX::Thyra::Group::setReusePolicy("PRPT_REBUILD");
 }
 
 Teuchos::RCP<const ::Thyra::VectorBase<double> >
@@ -117,6 +105,9 @@ computeScaling(const NOX::Solver::Generic& solver)
 
   RCP<const NOX::Thyra::Group> thyra_group =
     rcp_dynamic_cast<const NOX::Thyra::Group>(group);
+
+  if (thyra_group.is_null())
+    return;
 
   if (!thyra_group->isJacobian()) {
     RCP<NOX::Thyra::Group> tmp_nox_thyra_group =

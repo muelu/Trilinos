@@ -69,6 +69,11 @@
 #include "LOCA_MultiContinuation_ConstrainedGroup.H"
 #include "LOCA_MultiContinuation_ConstraintInterface.H"
 
+#include "Thyra_VectorStdOps.hpp"
+#include "NOX_PrePostOperator_Vector.H"
+#include "NOX_PrePostOperator_RowSumScaling.H"
+#include "NOX_MeritFunction_Weighted.hpp"
+
 LOCA::Stepper::Stepper(
                      const Teuchos::RCP<LOCA::GlobalData>& global_data,
              const Teuchos::RCP<LOCA::MultiContinuation::AbstractGroup>& initialGuess,
@@ -321,6 +326,13 @@ LOCA::Stepper::resetExceptLocaStatusTest(
   // Set previous solution vector in current solution group
   curGroupPtr->setPrevX(curGroupPtr->getX());
 
+  // NOX parameter list
+  Teuchos::RCP<NOX::Abstract::PrePostOperator> row_sum_observer =
+      Teuchos::rcp(new NOX::RowSumScaling(Teuchos::null, NOX::RowSumScaling::UpdateInvRowSumVectorAtBeginningOfSolve));
+
+  Teuchos::RCP<Teuchos::ParameterList> nox_parameters = parsedParams->getSublist("NOX");
+  nox_parameters->sublist("Solver Options").set<Teuchos::RCP<NOX::Abstract::PrePostOperator> >("User Defined Pre/Post Operator", row_sum_observer);
+
   // Create solver using initial conditions
   solverPtr = NOX::Solver::buildSolver(curGroupPtr, noxStatusTestPtr,
                        parsedParams->getSublist("NOX"));
@@ -423,9 +435,15 @@ LOCA::Stepper::start() {
   prevPredictorPtr =
     Teuchos::rcp_dynamic_cast<LOCA::MultiContinuation::ExtendedVector>(curGroupPtr->getPredictorTangent()[0].clone(NOX::ShapeCopy));
 
+  // NOX parameter list
+  Teuchos::RCP<NOX::Abstract::PrePostOperator> row_sum_observer =
+      Teuchos::rcp(new NOX::RowSumScaling(Teuchos::null, NOX::RowSumScaling::UpdateInvRowSumVectorAtBeginningOfSolve));
+
+  Teuchos::RCP<Teuchos::ParameterList> nox_parameters = parsedParams->getSublist("NOX");
+  nox_parameters->sublist("Solver Options").set<Teuchos::RCP<NOX::Abstract::PrePostOperator> >("User Defined Pre/Post Operator", row_sum_observer);
+
   // Create new solver using new continuation groups and combo status test
-  solverPtr = NOX::Solver::buildSolver(curGroupPtr, noxStatusTestPtr,
-                       parsedParams->getSublist("NOX"));
+  solverPtr = NOX::Solver::buildSolver(curGroupPtr, noxStatusTestPtr, nox_parameters);
 
   return LOCA::Abstract::Iterator::NotFinished;
 }
