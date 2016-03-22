@@ -1380,8 +1380,10 @@ void mult_A_B_newmatrix(
     for (size_t k = Arowptr[i]; k < Arowptr[i+1]; k++) {
       LO Aik  = Acolind[k];
       SC Aval = Avals[k];
+#ifdef SKIP_A_ZEROS
       if (Aval == SC_ZERO)
         continue;
+#endif
 
       if (targetMapToOrigRow[Aik] != LO_INVALID) {
         // Local matrix
@@ -1585,8 +1587,10 @@ void mult_A_B_reuse(
     for (size_t k = Arowptr[i]; k < Arowptr[i+1]; k++) {
       LO Aik  = Acolind[k];
       SC Aval = Avals[k];
+#ifdef SKIP_A_ZEROS
       if (Aval == SC_ZERO)
         continue;
+#endif
 
       if (targetMapToOrigRow[Aik] != LO_INVALID) {
         // Local matrix
@@ -1796,8 +1800,10 @@ void jacobi_A_B_newmatrix(
     for (size_t k = Arowptr[i]; k < Arowptr[i+1]; k++) {
       LO Aik  = Acolind[k];
       SC Aval = Avals[k];
+#ifdef SKIP_A_ZEROS
       if (Aval == SC_ZERO)
         continue;
+#endif
 
       if (targetMapToOrigRow[Aik] != LO_INVALID) {
         // Local matrix
@@ -2019,7 +2025,8 @@ void jacobi_A_B_reuse(
       LO Cij = Bcol2Ccol[Bij];
 
       TEUCHOS_TEST_FOR_EXCEPTION(c_status[Cij] < OLD_ip || c_status[Cij] >= CSR_ip,
-        std::runtime_error, "Trying to insert a new entry into a static graph");
+        std::runtime_error, "Trying to insert a new entry (" << i << "," << Cij << ") into a static graph " <<
+        "(c_status = " << c_status[Cij] << " of [" << OLD_ip << "," << CSR_ip << "))");
 
       Cvals[c_status[Cij]] = Bvals[j];
     }
@@ -2028,8 +2035,10 @@ void jacobi_A_B_reuse(
     for (size_t k = Arowptr[i]; k < Arowptr[i+1]; k++) {
       LO Aik  = Acolind[k];
       SC Aval = Avals[k];
+#ifdef SKIP_A_ZEROS
       if (Aval == SC_ZERO)
         continue;
+#endif
 
       if (targetMapToOrigRow[Aik] != LO_INVALID) {
         // Local matrix
@@ -2040,7 +2049,8 @@ void jacobi_A_B_reuse(
           LO Cij = Bcol2Ccol[Bkj];
 
           TEUCHOS_TEST_FOR_EXCEPTION(c_status[Cij] < OLD_ip || c_status[Cij] >= CSR_ip,
-            std::runtime_error, "Trying to insert a new entry into a static graph");
+            std::runtime_error, "Trying to insert a new entry (" << i << "," << Cij << ") into a static graph " <<
+            "(c_status = " << c_status[Cij] << " of [" << OLD_ip << "," << CSR_ip << "))");
 
           Cvals[c_status[Cij]] -= omega * Dval* Aval * Bvals[j];
         }
@@ -2053,7 +2063,8 @@ void jacobi_A_B_reuse(
           LO Cij = Icol2Ccol[Ikj];
 
           TEUCHOS_TEST_FOR_EXCEPTION(c_status[Cij] < OLD_ip || c_status[Cij] >= CSR_ip,
-            std::runtime_error, "Trying to insert a new entry into a static graph");
+            std::runtime_error, "Trying to insert a new entry (" << i << "," << Cij << ") into a static graph " <<
+            "(c_status = " << c_status[Cij] << " of [" << OLD_ip << "," << CSR_ip << "))");
 
           Cvals[c_status[Cij]] -= omega * Dval* Aval * Ivals[j];
         }
