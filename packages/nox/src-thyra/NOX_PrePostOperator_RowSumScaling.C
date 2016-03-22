@@ -85,7 +85,26 @@ runPreSolve(const NOX::Solver::Generic& solver)
   TEUCHOS_TEST_FOR_EXCEPTION(solver.getNumIterations(), std::logic_error,
     "Shouldn't the number of iterations always be 0 in the beginning");
 
+#if 0
+  NOX::Thyra::Group::setReusePolicy("PRPT_RECOMPUTE");
+#else
   NOX::Thyra::Group::setReusePolicy("PRPT_REBUILD");
+#endif
+
+#if 0
+  NOX::Thyra::Group::setReusePolicy("PRPT_REBUILD");
+
+  // For some reason, this function is called multiple times
+  static int numTransients = 0;
+  if (numTransients == 0)
+    NOX::Thyra::Group::setReusePolicy("PRPT_REBUILD");
+  numTransients++;
+  if (numTransients == 3) {
+    numTransients = 0;
+    NOX::Thyra::Group::setReusePolicy("PRPT_REBUILD");
+    rcp_const_cast<NOX::Thyra::Group>(thyra_group)->setReusePolicy("PRPT_REBUILD");
+  }
+#endif
 }
 
 Teuchos::RCP<const ::Thyra::VectorBase<double> >
