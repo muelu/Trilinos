@@ -790,7 +790,7 @@ namespace MueLu {
       manager.SetFactory("P", P);
 
       if (reuseType == "tP" && !filteringChangesMatrix)
-        keeps.push_back(keep_pair("AP graph", P.get()));
+        keeps.push_back(keep_pair("AP reuse data", P.get()));
 
     } else if (multigridAlgo == "emin") {
       MUELU_SET_VAR_2LIST(paramList, defaultList, "emin: pattern", std::string, patternType);
@@ -942,8 +942,8 @@ namespace MueLu {
       manager.SetFactory("A", RAP);
 
       if (reuseType == "RP" || (reuseType == "tP" && !filteringChangesMatrix)) {
-        keeps.push_back(keep_pair("AP graph",  RAP.get()));
-        keeps.push_back(keep_pair("RAP graph", RAP.get()));
+        keeps.push_back(keep_pair("AP reuse data",  RAP.get()));
+        keeps.push_back(keep_pair("RAP reuse data", RAP.get()));
       }
     }
 
