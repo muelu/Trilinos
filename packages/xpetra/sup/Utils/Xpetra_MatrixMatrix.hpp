@@ -252,7 +252,8 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
                          Matrix& C,
                          bool call_FillComplete_on_result = true,
                          bool doOptimizeStorage           = true,
-                         const std::string & label        = std::string()) {
+                         const std::string & label        = std::string(),
+                         const RCP<ParameterList>& params = null) {
 
       TEUCHOS_TEST_FOR_EXCEPTION(transposeA == false && C.getRowMap()->isSameAs(*A.getRowMap()) == false,
         Exceptions::RuntimeError, "XpetraExt::MatrixMatrix::Multiply: row map of C is not same as row map of A");
@@ -279,18 +280,18 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
 
         // 18Feb2013 JJH I'm reenabling the code that allows the matrix matrix multiply to do the fillComplete.
         // Previously, Tpetra's matrix matrix multiply did not support fillComplete.
-        Tpetra::MatrixMatrix::Multiply(tpA, transposeA, tpB, transposeB, tpC, haveMultiplyDoFillComplete, label);
+        Tpetra::MatrixMatrix::Multiply(tpA, transposeA, tpB, transposeB, tpC, haveMultiplyDoFillComplete, label, params);
 #else
         throw(Xpetra::Exceptions::RuntimeError("Xpetra must be compiled with Tpetra."));
 #endif
       }
 
       if (call_FillComplete_on_result && !haveMultiplyDoFillComplete) {
-        RCP<Teuchos::ParameterList> params = rcp(new Teuchos::ParameterList());
-        params->set("Optimize Storage", doOptimizeStorage);
+        RCP<Teuchos::ParameterList> fillParams = rcp(new Teuchos::ParameterList());
+        fillParams->set("Optimize Storage", doOptimizeStorage);
         C.fillComplete((transposeB) ? B.getRangeMap() : B.getDomainMap(),
                        (transposeA) ? A.getDomainMap() : A.getRangeMap(),
-                       params);
+                       fillParams);
       }
 
       // transfer striding information
@@ -325,7 +326,8 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
                                 Teuchos::FancyOStream& fos,
                                 bool doFillComplete           = true,
                                 bool doOptimizeStorage        = true,
-                                const std::string & label     = std::string()) {
+                                const std::string & label     = std::string(),
+                                const RCP<ParameterList>& params = null) {
 
       TEUCHOS_TEST_FOR_EXCEPTION(!A.isFillComplete(), Exceptions::RuntimeError, "A is not fill-completed");
       TEUCHOS_TEST_FOR_EXCEPTION(!B.isFillComplete(), Exceptions::RuntimeError, "B is not fill-completed");
@@ -360,7 +362,7 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
         fos << "Reuse C pattern" << std::endl;
       }
 
-      Multiply(A, transposeA, B, transposeB, *C, doFillComplete, doOptimizeStorage, label); // call Multiply routine from above
+      Multiply(A, transposeA, B, transposeB, *C, doFillComplete, doOptimizeStorage, label, params); // call Multiply routine from above
 
       return C;
     }
@@ -376,8 +378,9 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
       @param callFillCompleteOnResult if true, the resulting matrix should be fillComplete'd
       */
     static RCP<Matrix> Multiply(const Matrix& A, bool transposeA, const Matrix& B, bool transposeB, Teuchos::FancyOStream &fos,
-                                bool callFillCompleteOnResult = true, bool doOptimizeStorage = true, const std::string& label = std::string()) {
-      return Multiply(A, transposeA, B, transposeB, Teuchos::null, fos, callFillCompleteOnResult, doOptimizeStorage, label);
+                                bool callFillCompleteOnResult = true, bool doOptimizeStorage = true, const std::string& label = std::string(),
+                                const RCP<ParameterList>& params = null) {
+      return Multiply(A, transposeA, B, transposeB, Teuchos::null, fos, callFillCompleteOnResult, doOptimizeStorage, label, params);
     }
 
 #ifdef HAVE_XPETRA_EPETRAEXT
@@ -630,7 +633,8 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
                          Matrix& C,
                          bool call_FillComplete_on_result = true,
                          bool doOptimizeStorage = true,
-                         const std::string & label = std::string()) {
+                         const std::string & label = std::string(),
+                         const RCP<ParameterList>& params = null) {
       TEUCHOS_TEST_FOR_EXCEPTION(transposeA == false && C.getRowMap()->isSameAs(*A.getRowMap()) == false,
         Xpetra::Exceptions::RuntimeError, "XpetraExt::MatrixMatrix::Multiply: row map of C is not same as row map of A");
       TEUCHOS_TEST_FOR_EXCEPTION(transposeA == true  && C.getRowMap()->isSameAs(*A.getDomainMap()) == false,
@@ -680,7 +684,7 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
 
         // 18Feb2013 JJH I'm reenabling the code that allows the matrix matrix multiply to do the fillComplete.
         // Previously, Tpetra's matrix matrix multiply did not support fillComplete.
-        Tpetra::MatrixMatrix::Multiply(tpA, transposeA, tpB, transposeB, tpC, haveMultiplyDoFillComplete, label);
+        Tpetra::MatrixMatrix::Multiply(tpA, transposeA, tpB, transposeB, tpC, haveMultiplyDoFillComplete, label, params);
 # endif
 #else
         throw(Xpetra::Exceptions::RuntimeError("Xpetra must be compiled with Tpetra."));
@@ -688,11 +692,11 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
       }
 
       if (call_FillComplete_on_result && !haveMultiplyDoFillComplete) {
-        RCP<Teuchos::ParameterList> params = rcp(new Teuchos::ParameterList());
-        params->set("Optimize Storage",doOptimizeStorage);
+        RCP<Teuchos::ParameterList> fillParams = rcp(new Teuchos::ParameterList());
+        fillParams->set("Optimize Storage",doOptimizeStorage);
         C.fillComplete((transposeB) ? B.getRangeMap() : B.getDomainMap(),
                        (transposeA) ? A.getDomainMap() : A.getRangeMap(),
-                       params);
+                       fillParams);
       }
 
       // transfer striding information
@@ -729,7 +733,8 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
                                 Teuchos::FancyOStream& fos,
                                 bool doFillComplete           = true,
                                 bool doOptimizeStorage        = true,
-                                const std::string & label     = std::string()) {
+                                const std::string & label     = std::string(),
+                                const RCP<ParameterList>& params = null) {
 
       TEUCHOS_TEST_FOR_EXCEPTION(!A.isFillComplete(), Exceptions::RuntimeError, "A is not fill-completed");
       TEUCHOS_TEST_FOR_EXCEPTION(!B.isFillComplete(), Exceptions::RuntimeError, "B is not fill-completed");
@@ -744,9 +749,9 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
 
         RCP<Matrix> C = Convert_Epetra_CrsMatrix_ToXpetra_CrsMatrixWrap<SC,LO,GO,NO> (epC);
         if (doFillComplete) {
-          RCP<Teuchos::ParameterList> params = rcp(new Teuchos::ParameterList());
-          params->set("Optimize Storage", doOptimizeStorage);
-          C->fillComplete(B.getDomainMap(), A.getRangeMap(), params);
+          RCP<Teuchos::ParameterList> fillParams = rcp(new Teuchos::ParameterList());
+          fillParams->set("Optimize Storage", doOptimizeStorage);
+          C->fillComplete(B.getDomainMap(), A.getRangeMap(), fillParams);
         }
 
         // Fill strided maps information
@@ -788,7 +793,7 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
         fos << "Reuse C pattern" << std::endl;
       }
 
-      Multiply(A, transposeA, B, transposeB, *C, doFillComplete, doOptimizeStorage, label); // call Multiply routine from above
+      Multiply(A, transposeA, B, transposeB, *C, doFillComplete, doOptimizeStorage, label, params); // call Multiply routine from above
 
       return C;
     }
@@ -808,8 +813,9 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
                                 Teuchos::FancyOStream &fos,
                                 bool callFillCompleteOnResult = true,
                                 bool doOptimizeStorage        = true,
-                                const std::string & label     = std::string()){
-      return Multiply(A, transposeA, B, transposeB, Teuchos::null, fos, callFillCompleteOnResult, doOptimizeStorage, label);
+                                const std::string & label     = std::string(),
+                                const RCP<ParameterList>& params = null) {
+      return Multiply(A, transposeA, B, transposeB, Teuchos::null, fos, callFillCompleteOnResult, doOptimizeStorage, label, params);
     }
 
 #if defined(HAVE_XPETRA_EPETRA) && defined(HAVE_XPETRA_EPETRAEXT)
@@ -1221,7 +1227,8 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
                          Matrix& C,
                          bool call_FillComplete_on_result = true,
                          bool doOptimizeStorage           = true,
-                         const std::string & label        = std::string()) {
+                         const std::string & label        = std::string(),
+                         const RCP<ParameterList>& params = null) {
       TEUCHOS_TEST_FOR_EXCEPTION(transposeA == false && C.getRowMap()->isSameAs(*A.getRowMap()) == false,
         Xpetra::Exceptions::RuntimeError, "XpetraExt::MatrixMatrix::Multiply: row map of C is not same as row map of A");
       TEUCHOS_TEST_FOR_EXCEPTION(transposeA == true && C.getRowMap()->isSameAs(*A.getDomainMap()) == false,
@@ -1272,7 +1279,7 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
 
         //18Feb2013 JJH I'm reenabling the code that allows the matrix matrix multiply to do the fillComplete.
         //Previously, Tpetra's matrix matrix multiply did not support fillComplete.
-        Tpetra::MatrixMatrix::Multiply(tpA,transposeA,tpB,transposeB,tpC,haveMultiplyDoFillComplete, label);
+        Tpetra::MatrixMatrix::Multiply(tpA, transposeA, tpB, transposeB, tpC, haveMultiplyDoFillComplete, label, params);
 # endif
 #else
         throw(Xpetra::Exceptions::RuntimeError("Xpetra must be compiled with Tpetra."));
@@ -1280,11 +1287,11 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
       }
 
       if(call_FillComplete_on_result && !haveMultiplyDoFillComplete) {
-        RCP<Teuchos::ParameterList> params = rcp(new Teuchos::ParameterList());
-        params->set("Optimize Storage",doOptimizeStorage);
+        RCP<Teuchos::ParameterList> fillParams = rcp(new Teuchos::ParameterList());
+        fillParams->set("Optimize Storage",doOptimizeStorage);
         C.fillComplete((transposeB) ? B.getRangeMap() : B.getDomainMap(),
                        (transposeA) ? A.getDomainMap() : A.getRangeMap(),
-                       params);
+                       fillParams);
       }
 
       // transfer striding information
@@ -1321,7 +1328,8 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
                                 Teuchos::FancyOStream& fos,
                                 bool doFillComplete           = true,
                                 bool doOptimizeStorage        = true,
-                                const std::string & label     = std::string()) {
+                                const std::string & label     = std::string(),
+                                const RCP<ParameterList>& params = null) {
 
       TEUCHOS_TEST_FOR_EXCEPTION(!A.isFillComplete(), Exceptions::RuntimeError, "A is not fill-completed");
       TEUCHOS_TEST_FOR_EXCEPTION(!B.isFillComplete(), Exceptions::RuntimeError, "B is not fill-completed");
@@ -1356,7 +1364,7 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
         fos << "Reuse C pattern" << std::endl;
       }
 
-      Multiply(A, transposeA, B, transposeB, *C, doFillComplete, doOptimizeStorage, label); // call Multiply routine from above
+      Multiply(A, transposeA, B, transposeB, *C, doFillComplete, doOptimizeStorage, label, params); // call Multiply routine from above
 
       return C;
     }
@@ -1376,8 +1384,9 @@ Note: this class is not in the Xpetra_UseShortNames.hpp
                                 Teuchos::FancyOStream &fos,
                                 bool callFillCompleteOnResult = true,
                                 bool doOptimizeStorage        = true,
-                                const std::string & label     = std::string()){
-      return Multiply(A, transposeA, B, transposeB, Teuchos::null, fos, callFillCompleteOnResult, doOptimizeStorage, label);
+                                const std::string & label     = std::string(),
+                                const RCP<ParameterList>& params = null) {
+      return Multiply(A, transposeA, B, transposeB, Teuchos::null, fos, callFillCompleteOnResult, doOptimizeStorage, label, params);
     }
 
 #if defined(HAVE_XPETRA_EPETRA) && defined(HAVE_XPETRA_EPETRAEXT)
