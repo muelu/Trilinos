@@ -74,7 +74,7 @@ class AggregationAlgorithmBase : public BaseClass {
   //@{
 
   //! Destructor.
-  virtual        ~AggregationAlgorithmBase() {}     
+  virtual        ~AggregationAlgorithmBase() {}       
 
   //@}
 
