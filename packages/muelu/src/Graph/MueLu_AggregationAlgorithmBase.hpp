@@ -55,7 +55,7 @@
 #include "MueLu_GraphBase.hpp"
 #include "MueLu_Types.hpp"
 
-namespace MueLu {
+      namespace MueLu {
 
 /*!
      @class AggregationAlgorithmBase
@@ -74,7 +74,7 @@ class AggregationAlgorithmBase : public BaseClass {
   //@{
 
   //! Destructor.
-  virtual ~AggregationAlgorithmBase() {}
+  virtual        ~AggregationAlgorithmBase() {}     
 
   //@}
 
