@@ -4,9 +4,6 @@ on:
   issues:
     types: [opened, labeled]
 
-env:
-  GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
-
 permissions:
   contents: read
 
@@ -45,10 +42,11 @@ jobs:
       if: contains(github.event.label.name, 'MueLu') || contains(github.event.issue.title, 'MueLu')
       with:
          project-url: https://github.com/orgs/muelu/projects/4
-         github-token: ${ GITHUB_TOKEN }
+         github-token: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
     - name: Add to Tpetra Project
       uses: actions/add-to-project@244f685bbc3b7adfa8466e08b698b5577571133e # 1.0.2
       if: contains(github.event.label.name, 'Tpetra') || contains(github.event.issue.title, 'Tpetra')
       with:
         project-url: https://github.com/orgs/muelu/projects/4
-        github-token: ${ GITHUB_TOKEN }
+        github-token: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
+
