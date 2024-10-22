@@ -5,8 +5,7 @@ on:
     types: [opened, labeled]
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  MY_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
 
 permissions:
   contents: read
