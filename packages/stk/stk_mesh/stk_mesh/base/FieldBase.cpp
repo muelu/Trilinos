@@ -150,19 +150,18 @@ void FieldBase::set_initial_value(const void* new_initial_value, unsigned num_sc
   data_traits().copy(init_val, new_initial_value, num_scalars);
 }
 
-void FieldBase::insert_restriction(
-  const char     * arg_method ,
-  const Part     & arg_part ,
-  const unsigned   arg_num_scalars_per_entity ,
-  const unsigned   arg_first_dimension ,
-  const void*      arg_init_value )
+void FieldBase::insert_restriction(const char     * arg_method,
+                                   const Part     & arg_part,
+                                   const unsigned   arg_num_scalars_per_entity,
+                                   const unsigned   arg_first_dimension,
+                                   const void*      arg_init_value)
 {
   FieldRestriction tmp( arg_part );
 
   tmp.set_num_scalars_per_entity(arg_num_scalars_per_entity);
   tmp.set_dimension(arg_first_dimension);
 
-  if (arg_init_value != NULL) {
+  if (arg_init_value != nullptr) {
     //insert_restriction can be called multiple times for the same field, giving
     //the field different lengths on different mesh-parts.
     //We will only store one initial-value array, we need to store the one with
@@ -182,7 +181,7 @@ void FieldBase::insert_restriction(
     size_t nbytes = sizeof_scalar * num_scalars;
 
     size_t old_nbytes = 0;
-    if (get_initial_value() != NULL) {
+    if (get_initial_value() != nullptr) {
       old_nbytes = get_initial_value_num_bytes();
     }   
     if (nbytes > old_nbytes) {
@@ -269,19 +268,18 @@ void FieldBase::insert_restriction(
   }
 }
 
-void FieldBase::insert_restriction(
-  const char     * arg_method ,
-  const Selector & arg_selector ,
-  const unsigned   arg_num_scalars_per_entity ,
-  const unsigned   arg_first_dimension ,
-  const void*      arg_init_value )
+void FieldBase::insert_restriction(const char     * arg_method,
+                                   const Selector & arg_selector,
+                                   const unsigned   arg_num_scalars_per_entity,
+                                   const unsigned   arg_first_dimension,
+                                   const void*      arg_init_value)
 {
   FieldRestriction tmp( arg_selector );
 
   tmp.set_num_scalars_per_entity(arg_num_scalars_per_entity);
   tmp.set_dimension(arg_first_dimension);
 
-  if (arg_init_value != NULL) {
+  if (arg_init_value != nullptr) {
     //insert_restriction can be called multiple times for the same field, giving
     //the field different lengths on different mesh-parts.
     //We will only store one initial-value array, we need to store the one with
@@ -301,7 +299,7 @@ void FieldBase::insert_restriction(
     size_t nbytes = sizeof_scalar * num_scalars;
 
     size_t old_nbytes = 0;
-    if (get_initial_value() != NULL) {
+    if (get_initial_value() != nullptr) {
       old_nbytes = get_initial_value_num_bytes();
     }   
     if (nbytes > old_nbytes) {
@@ -440,7 +438,7 @@ void FieldBase::verify_and_clean_restrictions(const Part& superset, const Part& 
 
 void FieldBase::set_mesh(stk::mesh::BulkData* bulk)
 {
-  if (m_mesh == NULL || bulk == NULL) {
+  if (m_mesh == nullptr || bulk == nullptr) {
     m_mesh = bulk;
   }
   else {
@@ -510,6 +508,7 @@ void FieldBase::rotate_multistate_data(bool rotateNgpFieldViews)
       }
     }
 
+    Kokkos::Profiling::pushRegion("field-meta-data swap");
     for (int s = 1; s < numStates; ++s) {
       FieldBase* sField = field_state(static_cast<FieldState>(s));
       m_field_meta_data.swap(sField->m_field_meta_data);
@@ -519,15 +518,21 @@ void FieldBase::rotate_multistate_data(bool rotateNgpFieldViews)
       std::swap(m_modifiedOnHost, sField->m_modifiedOnHost);
       std::swap(m_modifiedOnDevice, sField->m_modifiedOnDevice);
     }
+    Kokkos::Profiling::popRegion();
 
-    for(int s = 0; s < numStates; ++s) {
-      NgpFieldBase* ngpField = field_state(static_cast<FieldState>(s))->get_ngp_field();
-      if (ngpField != nullptr) {
-        ngpField->update_bucket_pointer_view();
-        ngpField->fence();
+    if (!(rotateNgpFieldViews && allStatesHaveNgpFields)) {
+      Kokkos::Profiling::pushRegion("ngpField update_bucket_pointer_view");
+      for(int s = 0; s < numStates; ++s) {
+        NgpFieldBase* ngpField = field_state(static_cast<FieldState>(s))->get_ngp_field();
+        if (ngpField != nullptr) {
+          ngpField->update_bucket_pointer_view();
+          ngpField->fence();
+        }
       }
+      Kokkos::Profiling::popRegion();
     }
 
+    Kokkos::Profiling::pushRegion("ngpField swap_field_views");
     if (rotateNgpFieldViews && allStatesHaveNgpFields) {
       for (int s = 1; s < numStates; ++s) {
         NgpFieldBase* ngpField_sminus1 = field_state(static_cast<FieldState>(s-1))->get_ngp_field();
@@ -535,12 +540,13 @@ void FieldBase::rotate_multistate_data(bool rotateNgpFieldViews)
         ngpField_s->swap_field_views(ngpField_sminus1);
       }
     }
+    Kokkos::Profiling::popRegion();
   }
 }
 
 void
 FieldBase::modify_on_host() const
-{ 
+{
   STK_ThrowRequireMsg(m_modifiedOnDevice == false,
                   "Modify on host called for Field: " << name() << " but it has an uncleared modified_on_device");
 
@@ -558,7 +564,7 @@ FieldBase::modify_on_device() const
 
 void
 FieldBase::modify_on_host(const Selector& s) const
-{ 
+{
   modify_on_host();
 }
 

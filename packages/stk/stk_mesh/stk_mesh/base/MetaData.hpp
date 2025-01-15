@@ -67,7 +67,6 @@
 #include "stk_util/diag/StringUtil.hpp"
 #include <type_traits>
 
-namespace shards { class ArrayDimTag; }
 namespace shards { class CellTopologyManagedData; }
 namespace stk { namespace mesh { class BulkData; } }
 namespace stk { namespace mesh { class MetaData; } }
@@ -77,8 +76,8 @@ namespace mesh {
 template <typename>
 struct is_field : std::false_type {};
 
-template <typename Scalar, class Tag1, class Tag2, class Tag3, class Tag4, class Tag5, class Tag6, class Tag7>
-struct is_field<Field<Scalar, Tag1, Tag2, Tag3, Tag4, Tag5, Tag6, Tag7>> : std::true_type {};
+template <typename Scalar>
+struct is_field<Field<Scalar>> : std::true_type {};
 
 template <typename field_type>
 constexpr bool is_field_v = is_field<field_type>::value;
@@ -89,16 +88,6 @@ struct is_field_base : std::is_same<field_type, FieldBase> {};
 
 template <typename field_type>
 constexpr bool is_field_base_v = is_field_base<field_type>::value;
-
-
-template <typename>
-struct is_simple_field : std::false_type {};
-
-template <typename Scalar>
-struct is_simple_field<Field<Scalar, void, void, void, void, void, void, void>> : std::true_type {};
-
-template <typename field_type>
-constexpr bool is_simple_field_v = is_simple_field<field_type>::value;
 
 
 /** \addtogroup stk_mesh_module
@@ -119,7 +108,7 @@ inline void set_topology(Part & part)
 stk::topology get_topology(const MetaData& meta_data, EntityRank entity_rank, const std::pair<const unsigned*, const unsigned*>& supersets);
 
 /** get the stk::topology given a Shards Cell Topology */
-stk::topology get_topology(shards::CellTopology shards_topology, unsigned spatial_dimension = 3);
+stk::topology get_topology(shards::CellTopology shards_topology, unsigned spatial_dimension = 3, bool useAllFaceSideShell = false);
 
 /** Get the Shards Cell Topology given a stk::topology  */
 shards::CellTopology get_cell_topology(stk::topology topo);
@@ -601,14 +590,28 @@ public:
   bool delete_part_alias_case_insensitive(Part& part, const std::string& alias);
   std::vector<std::string> get_part_aliases(const Part& part) const;
 
+  // To enable the Field Sync Debugger in a production run, add the STK_DEBUG_FIELD_SYNC
+  // define to your build.  This function is solely used to flip external parts of the
+  // debugger on for unit testing when it is not enabled globally.
+  //
+  void enable_field_sync_debugger() {
+    m_isFieldSyncDebuggerEnabled = true;
+  }
+
+  bool is_field_sync_debugger_enabled() {
+#ifdef STK_DEBUG_FIELD_SYNC
+    return true;
+#else
+    return m_isFieldSyncDebuggerEnabled;
+#endif
+  }
+
 protected:
 
   Part & declare_internal_part( const std::string & p_name);
 
   /** \} */
 private:
-  // Functions
-
   MetaData( const MetaData & );                ///< \brief  Not allowed
   MetaData & operator = ( const MetaData & );  ///< \brief  Not allowed
 
@@ -622,11 +625,9 @@ private:
 
   void assign_topology(Part& part, stk::topology stkTopo);
 
-  // Members
+  void declare_field_sync_debugger_field(stk::mesh::FieldBase& field);
 
   BulkData* m_bulk_data;
-  bool   m_commit ;
-  bool   m_are_late_fields_enabled;
   impl::PartRepository m_part_repo ;
   CSet   m_attributes ;
 
@@ -651,6 +652,10 @@ private:
 
   std::map<std::string, unsigned, std::less<std::string> > m_partAlias;
   std::map<unsigned, std::vector<std::string>> m_partReverseAlias;
+
+  bool m_commit;
+  bool m_are_late_fields_enabled;
+  bool m_isFieldSyncDebuggerEnabled;
 
   /** \name  Invariants/preconditions for MetaData.
    * \{
@@ -784,16 +789,14 @@ Field<T> * MetaData::get_field(stk::mesh::EntityRank arg_entity_rank,
                                const char * fileName,
                                int lineNumber) const
 {
-  static_assert(not is_field_v<T>, "You must use a datatype as the template parameter to MetaData::get_field(),"
-                                   "and not the Field itself");
+  static_assert(not is_field_v<T> && not is_field_base_v<T>,
+                "You must use a datatype as the template parameter to MetaData::get_field(), "
+                "and not the Field itself");
 
   const DataTraits & dt = data_traits<T>();
   const DataTraits & dt_void = data_traits<void>();
-  const int fieldRank = 0;
 
-  std::array<shards::ArrayDimTag*, 8> tags {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-
-  FieldBase * const field = m_field_repo.get_field(arg_entity_rank, name, dt, fieldRank, tags.data(), 0);
+  FieldBase * const field = m_field_repo.get_field(arg_entity_rank, name, dt, 0);
 
   STK_ThrowRequireMsg(field == nullptr ||
                       field->data_traits().type_info == dt.type_info ||
@@ -812,13 +815,11 @@ MetaData::declare_field(stk::topology::rank_t arg_entity_rank,
                         const char * fileName,
                         int lineNumber)
 {
-  static_assert(not is_field_v<T>, "You must use a datatype as the template parameter to MetaData::declare_field(),"
-                                   "and not the Field itself");
+  static_assert(not is_field_v<T> && not is_field_base_v<T>,
+                "You must use a datatype as the template parameter to MetaData::declare_field(), "
+                "and not the Field itself");
 
   const DataTraits & traits = data_traits<T>();
-  const int fieldRank = 0;
-
-  std::array<shards::ArrayDimTag*, 8> tags {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
   const char** reservedStateSuffix = reserved_state_suffix();
 
@@ -841,8 +842,7 @@ MetaData::declare_field(stk::topology::rank_t arg_entity_rank,
 
   Field<T> * f[MaximumFieldStates] = {nullptr};
 
-  FieldBase* rawField = m_field_repo.get_field(arg_entity_rank, name,
-                                               traits, fieldRank, tags.data(), number_of_states);
+  FieldBase* rawField = m_field_repo.get_field(arg_entity_rank, name, traits, number_of_states);
 
   f[0] = dynamic_cast<Field<T>*>(rawField);
 
@@ -881,8 +881,6 @@ MetaData::declare_field(stk::topology::rank_t arg_entity_rank,
                           m_field_repo.get_fields().size(),
                           field_names[i],
                           traits,
-                          fieldRank,
-                          tags.data(),
                           number_of_states,
                           static_cast<FieldState>(i));
 
@@ -896,6 +894,8 @@ MetaData::declare_field(stk::topology::rank_t arg_entity_rank,
 
   f[0]->set_mesh(m_bulk_data);
 
+  declare_field_sync_debugger_field(*f[0]);
+
   return *f[0];
 }
 
@@ -905,10 +905,6 @@ field_type & put_field_on_mesh(field_type & field,
                                const Part & part,
                                const typename field_type::value_type* init_value)
 {
-  static_assert(is_simple_field_v<field_type> || is_field_base_v<field_type>,
-                "You must only call put_field_on_mesh() with a simple field argument (i.e. without template parameters"
-                " beyond the datatype");
-
   MetaData & meta = MetaData::get(field);
 
   unsigned numScalarsPerEntity = 1;
@@ -924,10 +920,6 @@ field_type & put_field_on_mesh(field_type & field,
                                const Selector & selector,
                                const typename field_type::value_type* init_value)
 {
-  static_assert(is_simple_field_v<field_type> || is_field_base_v<field_type>,
-                "You must only call put_field_on_mesh() with a simple field argument (i.e. without template parameters"
-                " beyond the datatype");
-
   MetaData & meta = MetaData::get(field);
 
   unsigned numScalarsPerEntity = 1;
@@ -1102,8 +1094,9 @@ Field<T> * get_field_by_name(const std::string & name,
                              const char * fileName = HOST_DEBUG_FILE_NAME,
                              int lineNumber = HOST_DEBUG_LINE_NUMBER)
 {
-  static_assert(not is_field_v<T>, "You must use a datatype as the template parameter to get_field_by_name(),"
-                                   "and not the Field itself");
+  static_assert(not is_field_v<T> && not is_field_base_v<T>,
+                "You must use a datatype as the template parameter to get_field_by_name(), "
+                "and not the Field itself");
 
   Field<T>* field = nullptr;
   unsigned num_nonnull_fields = 0;

@@ -1,6 +1,3 @@
-# -*- cmake -*-
-
-
 # Set the package name
 TRIBITS_PACKAGE(PyTrilinos2 DISABLE_STRONG_WARNINGS)
 
@@ -27,20 +24,20 @@ PYTRILINOS2_CMAKE_ERROR
   ON )
 
 TRIBITS_ADD_OPTION_AND_DEFINE(PyTrilinos2_BINDER_VERBOSE
-  PYTRILINOS2_B_VERBOSE
+  PYTRILINOS2_VERBOSE
   "Increase the verbosity of binder."
-  OFF ) 
+  OFF )
 
-SET(PyTrilinos2_BINDER_NUM_FILES "100" CACHE STRING "Maxinum number of generated files by binder.")
+SET(PyTrilinos2_BINDER_NUM_FILES "150" CACHE STRING "Maxinum number of generated files by binder.")
 
-MESSAGE("-- PYTHON_EXECUTABLE:")
-IF(NOT DEFINED ${PYTHON_EXECUTABLE})
-  find_program(PYTHON_EXECUTABLE
+MESSAGE("-- Python3_EXECUTABLE:")
+IF(NOT DEFINED ${Python3_EXECUTABLE})
+  find_program(Python3_EXECUTABLE
       NAMES python3 python
       )
-  MESSAGE("  -- CMake has set: PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
+  MESSAGE("  -- CMake has set: Python3_EXECUTABLE = ${Python3_EXECUTABLE}")
 ELSE()
-  MESSAGE("  -- User has set: PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
+  MESSAGE("  -- User has set: Python3_EXECUTABLE = ${Python3_EXECUTABLE}")
 ENDIF()
 
 function(get_all_include_dirs  LIBRARY_NAME all_include_dirs all_visited_libs)
@@ -184,7 +181,7 @@ FOREACH(line IN LISTS eti_files_without_dir)
 ENDFOREACH(line)
 file(WRITE ${all_ETI_files_list} ${CONTENTS})
 
-SET(ETI_classes "Tpetra_CrsMatrix;Tpetra_Vector;Tpetra_MultiVector")
+SET(ETI_classes "Tpetra_CrsMatrix;Tpetra_Vector;Tpetra_MultiVector;Tpetra_FEMultiVector;Tpetra_FECrsMatrix")
 SET(CONTENTS "")
 FOREACH(line IN LISTS ETI_classes)
   SET(CONTENTS "${CONTENTS}${line}\n")
@@ -196,7 +193,7 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src)
 
 add_custom_command(
   OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/src/PyTrilinos2_Tpetra_ETI.hpp ${CMAKE_CURRENT_BINARY_DIR}/python/getTpetraTypeName.py
-  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/gather_ETI.py ${CMAKE_CURRENT_BINARY_DIR} ${all_ETI_files_list} ${all_ETI_classes_list} "src/PyTrilinos2_Tpetra_ETI.hpp"
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/gather_ETI.py ${CMAKE_CURRENT_BINARY_DIR} ${all_ETI_files_list} ${all_ETI_classes_list} "src/PyTrilinos2_Tpetra_ETI.hpp"
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/include_tmp
 )
 add_custom_target(generate_ETI_name DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/src/PyTrilinos2_Tpetra_ETI.hpp ${CMAKE_CURRENT_BINARY_DIR}/include_tmp)
@@ -206,11 +203,15 @@ list (APPEND PyTrilinos2PyFiles ${PyTrilinos2PyFiles2})
 
 add_custom_command(
   OUTPUT  ${binder_include_name}
-  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/gather_includes.py ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${all_header_with_dir_list} ${all_header_without_dir_list} ${binder_include_name}
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/gather_includes.py ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${all_header_with_dir_list} ${all_header_without_dir_list} ${binder_include_name}
   DEPENDS generate_ETI_name ${CMAKE_CURRENT_BINARY_DIR}/include_tmp
 )
 add_custom_target(generate_include_name DEPENDS ${binder_include_name})
 add_dependencies(generate_include_name generate_ETI_name)
+
+ASSERT_DEFINED(
+  ${PACKAGE_NAME}_ENABLE_MueLu
+)
 
 set(BINDER_OPTIONS "")
 list(APPEND BINDER_OPTIONS --root-module PyTrilinos2)
@@ -223,13 +224,18 @@ ELSE()
 ENDIF()
 list(APPEND BINDER_OPTIONS --bind Teuchos)
 list(APPEND BINDER_OPTIONS --bind Tpetra)
-list(APPEND BINDER_OPTIONS --bind MueLu)
-IF(PYTRILINOS2_B_VERBOSE)
+list(APPEND BINDER_OPTIONS --bind Thyra)
+list(APPEND BINDER_OPTIONS --bind ThyraTpetraAdapters)
+list(APPEND BINDER_OPTIONS --bind Stratimikos)
+IF(${PACKAGE_NAME}_ENABLE_MueLu)
+  list(APPEND BINDER_OPTIONS --bind MueLu)
+ENDIF()
+IF(PYTRILINOS2_VERBOSE)
   list(APPEND BINDER_OPTIONS -v)
 ENDIF()
 IF(PYTRILINOS2_SUPPRESS_ERRORS)
   list(APPEND BINDER_OPTIONS --suppress-errors)
-ENDIF()  
+ENDIF()
 list(APPEND BINDER_OPTIONS --config ${CMAKE_CURRENT_SOURCE_DIR}/scripts/PyTrilinos2_config.cfg)
 list(APPEND BINDER_OPTIONS --)
 IF(TPL_ENABLE_CUDA)
@@ -241,6 +247,14 @@ if (NOT(MPI_BASE_DIR STREQUAL ""))
   list(APPEND BINDER_OPTIONS -I${MPI_BASE_DIR}/include)
 ENDIF()
 list(APPEND BINDER_OPTIONS -I${CMAKE_CURRENT_BINARY_DIR}/include_tmp)
+list(APPEND BINDER_OPTIONS -I${CMAKE_CURRENT_BINARY_DIR}/include_tmp/mdspan)
+list(APPEND BINDER_OPTIONS -I${CMAKE_CURRENT_BINARY_DIR}/include_tmp/View/MDSpan)
+list(APPEND BINDER_OPTIONS -I${CMAKE_CURRENT_BINARY_DIR}/include_tmp/experimental)
+list(APPEND BINDER_OPTIONS -I${CMAKE_CURRENT_BINARY_DIR}/include_tmp/experimental/__p0009_bits)
+list(APPEND BINDER_OPTIONS -I${CMAKE_CURRENT_BINARY_DIR}/include_tmp/experimental/__p1684_bits)
+list(APPEND BINDER_OPTIONS -I${CMAKE_CURRENT_BINARY_DIR}/include_tmp/experimental/__p2389_bits)
+list(APPEND BINDER_OPTIONS -I${CMAKE_CURRENT_BINARY_DIR}/include_tmp/experimental/__p2630_bits)
+list(APPEND BINDER_OPTIONS -I${CMAKE_CURRENT_BINARY_DIR}/include_tmp/experimental/__p2642_bits)
 list(APPEND BINDER_OPTIONS -I${CMAKE_CURRENT_BINARY_DIR}/src)
 list(APPEND BINDER_OPTIONS -I${CMAKE_CURRENT_SOURCE_DIR}/src)
 IF(NOT DEFINED PyTrilinos2_BINDER_GCC_TOOLCHAIN)
@@ -272,12 +286,12 @@ SET(PyTrilinos2_INSTALL_PREFIX ${PyTrilinos2_DEFAULT_INSTALL_PREFIX}
   CACHE PATH "The path prefix for where PyTrilinos2 will be installed, e.g. /usr/local")
 
 # Get the python version
-EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c
+EXECUTE_PROCESS(COMMAND ${Python3_EXECUTABLE} -c
                         "import sys; print(sys.version_info.major)"
   OUTPUT_VARIABLE PYTHON_MAJOR_VERSION
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c
+EXECUTE_PROCESS(COMMAND ${Python3_EXECUTABLE} -c
                         "import sys; print(sys.version_info.minor)"
   OUTPUT_VARIABLE PYTHON_MINOR_VERSION
   OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -300,7 +314,7 @@ INSTALL(FILES
 
 # Find the pybind11 CMake module
 EXECUTE_PROCESS(COMMAND
-  ${PYTHON_EXECUTABLE} -c "import pybind11; print(pybind11.get_cmake_dir())"
+  ${Python3_EXECUTABLE} -c "import pybind11; print(pybind11.get_cmake_dir())"
   OUTPUT_VARIABLE pybind11_DIR
   ERROR_VARIABLE  pybind11_CMAKE_ERROR
   OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -310,7 +324,7 @@ MESSAGE(STATUS "pybind11 CMake path: ${pybind11_DIR}")
 find_package(pybind11 REQUIRED)
 
 EXECUTE_PROCESS(COMMAND
-  ${PYTHON_EXECUTABLE} -c "import mpi4py; print(mpi4py.get_include())"
+  ${Python3_EXECUTABLE} -c "import mpi4py; print(mpi4py.get_include())"
   OUTPUT_VARIABLE Mpi4Py_INCLUDE_DIR
   ERROR_VARIABLE  Mpi4Py_INCLUDE_ERROR
   OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -323,7 +337,7 @@ ELSE()
 ENDIF()
 
 EXECUTE_PROCESS(COMMAND
-  ${PYTHON_EXECUTABLE} -c "import mpi4py; print(mpi4py.get_config()['mpicxx'])"
+  ${Python3_EXECUTABLE} -c "import mpi4py; print(mpi4py.get_config()['mpicxx'])"
   OUTPUT_VARIABLE Mpi4Py_MPICXX
   OUTPUT_STRIP_TRAILING_WHITESPACE
   )
@@ -338,7 +352,9 @@ ADD_SUBDIRECTORY( src )
 file(COPY ${PyTrilinos2PyFiles} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/PyTrilinos2/.)
 #file(COPY ${PyTrilinos2PyFilesSo} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/PyTrilinos2/.)
 
-SET(PyTrilinos2_PYTHONPATH "${CMAKE_CURRENT_BINARY_DIR}:$ENV{PYTHONPATH}")
+SET(PyTrilinos2_PYTHONPATH "${CMAKE_CURRENT_BINARY_DIR}")
+
+TRIBITS_ADD_EXAMPLE_DIRECTORIES(examples)
 
 TRIBITS_ADD_TEST_DIRECTORIES(test)
 

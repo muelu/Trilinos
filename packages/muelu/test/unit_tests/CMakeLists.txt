@@ -75,6 +75,7 @@ APPEND_SET(SOURCES
   MueLu_CoupledRBMFactory.cpp
   PermutationFactory.cpp
   RigidBodyModeFactory.cpp
+  ML2MueLuParameterTranslator.cpp
 )
 
 APPEND_SET(SOURCES_INTREPID2
@@ -118,12 +119,6 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(UnitTestsTestMatrices_cp
 )
 
 IF (${PACKAGE_NAME}_ENABLE_Epetra)
-
-IF( HAVE_${PACKAGE_NAME_UC}_DEPRECATED_CODE)
-APPEND_SET(SOURCES
-  ParameterList/MLParameterListInterpreter.cpp
-)
-ENDIF()
 
 APPEND_SET(SOURCES
   ParameterList/CreateSublists.cpp
@@ -450,6 +445,5 @@ ADD_SUBDIRECTORY(ParameterList/FactoryFactory/)
 ADD_SUBDIRECTORY(ParameterList/ParameterListInterpreter/)
 
 IF (${PACKAGE_NAME}_ENABLE_Epetra)
-  ADD_SUBDIRECTORY(ParameterList/MLParameterListInterpreter/)
   ADD_SUBDIRECTORY(ParameterList/CreateSublists/)
 ENDIF()

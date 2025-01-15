@@ -127,8 +127,7 @@ stk::topology get_subcell_nodes(const BulkData& mesh,
     const Entity entity ,
     EntityRank         subcell_rank ,
     unsigned           subcell_ordinal ,
-    EntityVector     & subcell_nodes
-    );
+    EntityVector     & subcell_nodes);
 
 /** \brief  Given an entity and collection of nodes, return the
  *          local id of the subcell that contains those nodes in the
@@ -139,36 +138,18 @@ int get_entity_subcell_id( const BulkData& mesh, const Entity entity ,
                            stk::topology side_topology,
                            const EntityVector      & side_nodes );
 
-inline
 void get_parts_with_topology(stk::topology topology,
                              stk::mesh::BulkData& mesh,
                              stk::mesh::PartVector& parts,
-                             bool skip_topology_root_parts=false)
-{
-  parts.clear();
-
-  const stk::mesh::MetaData & fem_meta = mesh.mesh_meta_data();
-
-  const stk::mesh::PartVector& all_parts = fem_meta.get_parts();
-
-  stk::mesh::PartVector::const_iterator
-    iter = all_parts.begin(),
-    iter_end = all_parts.end();
-
-  for(; iter!=iter_end; ++iter) {
-    stk::mesh::Part* part =  *iter;
-    if (fem_meta.get_topology(*part) == topology) {
-      if (skip_topology_root_parts && stk::mesh::is_topology_root_part(*part)) {
-        continue;
-      }
-      parts.push_back(part);
-    }
-  }
-}
+                             bool skip_topology_root_parts=false);
 
 stk::mesh::Entity get_side_entity_for_elem_side_pair_of_rank(const stk::mesh::BulkData &bulk, Entity elem, int sideOrdinal, stk::mesh::EntityRank sideRank);
 stk::mesh::Entity get_side_entity_for_elem_side_pair(const stk::mesh::BulkData &bulk, Entity elem, int sideOrdinal);
 stk::mesh::Entity get_side_entity_for_elem_id_side_pair_of_rank(const stk::mesh::BulkData &bulk, int64_t elemId, int sideOrdinal, stk::mesh::EntityRank sideRank);
+
+size_t num_sides(const BulkData& mesh, Entity entity);
+stk::mesh::EntityVector get_sides(const BulkData& mesh, Entity entity);
+std::vector<stk::mesh::ConnectivityOrdinal> get_side_ordinals(const BulkData& mesh, Entity entity);
 
 stk::mesh::EntityId get_max_id_on_local_proc(const BulkData& bulk, EntityRank rank);
 
